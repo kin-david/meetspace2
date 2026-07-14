@@ -1,0 +1,500 @@
+/* ════════════════════════════════════════════
+   MeetSpace — Admin Login Page
+   admin-style.css
+   Font: Poppins (Google Fonts)
+   Theme: Dark Navy | Gold | Black
+════════════════════════════════════════════ */
+
+/* ── CSS Variables ── */
+:root {
+  --navy:          #0F172A;       /* background base         */
+  --navy-mid:      #1E293B;       /* card glass base         */
+  --navy-light:    #334155;       /* subtle borders          */
+  --gold:          #D4AF37;       /* primary accent          */
+  --gold-dark:     #B8941E;       /* hover state             */
+  --gold-glow:     rgba(212,175,55,0.18);
+  --black:         #111111;       /* secondary               */
+  --white:         #FFFFFF;
+  --gray-light:    #CBD5E1;       /* body text / labels      */
+  --gray-muted:    #94A3B8;       /* placeholder / muted     */
+  --input-bg:      rgba(255,255,255,0.05);
+  --card-bg:       rgba(30,41,59,0.72);
+  --card-border:   rgba(212,175,55,0.20);
+  --shadow-card:   0 24px 60px rgba(0,0,0,0.50), 0 4px 16px rgba(0,0,0,0.30);
+  --shadow-btn:    0 6px 24px rgba(212,175,55,0.35);
+  --radius-input:  10px;
+  --radius-card:   16px;
+  --radius-btn:    12px;
+  --transition:    0.25s ease;
+  --font:          'Poppins', system-ui, sans-serif;
+}
+
+/* ════════════════════════════════════════════
+   RESET
+════════════════════════════════════════════ */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ════════════════════════════════════════════
+   BASE
+════════════════════════════════════════════ */
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--font);
+  background-color: var(--navy);
+  color: var(--white);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+  position: relative;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ════════════════════════════════════════════
+   BACKGROUND — Dark gradient + decorative blobs
+════════════════════════════════════════════ */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 20% 20%, rgba(212,175,55,0.07) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 80%, rgba(212,175,55,0.05) 0%, transparent 60%),
+    linear-gradient(135deg, #0F172A 0%, #1a2440 50%, #0F172A 100%);
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* ── Floating blurred decorative circles ── */
+.bg-shapes {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.shape {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.18;
+}
+
+/* Top-left gold blob */
+.shape-1 {
+  width: 400px;
+  height: 400px;
+  background: var(--gold);
+  top: -120px;
+  left: -120px;
+  animation: floatShape 8s ease-in-out infinite alternate;
+}
+
+/* Bottom-right navy-gold blob */
+.shape-2 {
+  width: 320px;
+  height: 320px;
+  background: #2563EB;
+  bottom: -80px;
+  right: -80px;
+  opacity: 0.10;
+  animation: floatShape 10s ease-in-out infinite alternate-reverse;
+}
+
+/* Centre subtle blob */
+.shape-3 {
+  width: 200px;
+  height: 200px;
+  background: var(--gold);
+  top: 50%;
+  left: 60%;
+  opacity: 0.08;
+  animation: floatShape 12s ease-in-out infinite alternate;
+}
+
+@keyframes floatShape {
+  from { transform: translate(0, 0) scale(1);    }
+  to   { transform: translate(30px, 20px) scale(1.08); }
+}
+
+/* ════════════════════════════════════════════
+   PAGE WRAPPER — centres card
+════════════════════════════════════════════ */
+.page-wrapper {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+}
+
+/* ════════════════════════════════════════════
+   LOGIN CARD — glassmorphism
+════════════════════════════════════════════ */
+.login-card {
+  width: 100%;
+  max-width: 440px;
+  background: var(--card-bg);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-card);
+  padding: 3rem 2.5rem 2.5rem;
+  text-align: center;
+
+  /* Subtle entrance animation */
+  animation: cardIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(28px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)    scale(1);    }
+}
+
+/* Gold top-border accent */
+.login-card::before {
+  content: '';
+  display: block;
+  width: 60px;
+  height: 3px;
+  background: var(--gold);
+  border-radius: 2px;
+  margin: 0 auto 2rem;
+}
+
+/* ── Admin shield icon ── */
+.admin-icon {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+  box-shadow: 0 8px 24px rgba(212,175,55,0.40);
+}
+
+.admin-icon i {
+  font-size: 32px;
+  color: var(--black);
+}
+
+/* ── Card headings ── */
+.card-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--white);
+  letter-spacing: -0.01em;
+  margin-bottom: 0.4rem;
+}
+
+.card-subtitle {
+  font-size: 0.875rem;
+  color: var(--gray-muted);
+  font-weight: 300;
+  margin-bottom: 2rem;
+}
+
+/* ════════════════════════════════════════════
+   FORM
+════════════════════════════════════════════ */
+.login-form {
+  text-align: left;
+}
+
+/* ── Field group ── */
+.field-group {
+  margin-bottom: 1.25rem;
+}
+
+.field-label {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--gray-light);
+  margin-bottom: 7px;
+}
+
+/* ── Input wrapper with icon ── */
+.field-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+/* Left icon */
+.field-icon {
+  position: absolute;
+  left: 14px;
+  font-size: 18px;
+  color: var(--gray-muted);
+  pointer-events: none;
+  transition: color var(--transition);
+}
+
+/* Input field */
+.field-input {
+  width: 100%;
+  height: 50px;
+  padding: 0 44px 0 44px;
+  background: var(--input-bg);
+  border: 1.5px solid var(--navy-light);
+  border-radius: var(--radius-input);
+  font-family: var(--font);
+  font-size: 0.9375rem;
+  color: var(--white);
+  outline: none;
+  transition:
+    border-color var(--transition),
+    background var(--transition),
+    box-shadow var(--transition);
+}
+
+.field-input::placeholder {
+  color: var(--gray-muted);
+  font-weight: 300;
+}
+
+/* Hover state */
+.field-input:hover {
+  border-color: rgba(212,175,55,0.40);
+  background: rgba(255,255,255,0.07);
+}
+
+/* Focus state — gold ring */
+.field-input:focus {
+  border-color: var(--gold);
+  background: rgba(255,255,255,0.08);
+  box-shadow: 0 0 0 3px var(--gold-glow);
+}
+
+/* Icon turns gold on input focus */
+.field-wrap:focus-within .field-icon {
+  color: var(--gold);
+}
+
+/* Password toggle button (eye) */
+.toggle-password {
+  position: absolute;
+  right: 12px;
+  background: transparent;
+  border: none;
+  color: var(--gray-muted);
+  font-size: 18px;
+  height: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 6px;
+  cursor: pointer;
+}
+
+.toggle-password:focus {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+.toggle-password:hover {
+  color: var(--gold);
+}
+
+/* ── Remember me + Forgot ── */
+.form-options {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.75rem;
+}
+
+/* Custom checkbox label */
+.remember-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Hide native checkbox */
+.remember-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* Custom checkbox box */
+.custom-check {
+  width: 18px;
+  height: 18px;
+  border: 1.5px solid var(--navy-light);
+  border-radius: 5px;
+  background: var(--input-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: border-color var(--transition), background var(--transition);
+}
+
+/* Checked state */
+.remember-input:checked + .custom-check {
+  background: var(--gold);
+  border-color: var(--gold);
+}
+
+/* Checkmark tick */
+.remember-input:checked + .custom-check::after {
+  content: '';
+  display: block;
+  width: 5px;
+  height: 9px;
+  border: 2px solid var(--black);
+  border-top: none;
+  border-left: none;
+  transform: rotate(45deg) translate(-1px, -1px);
+}
+
+/* Focus ring for keyboard nav */
+.remember-input:focus-visible + .custom-check {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+}
+
+.remember-text {
+  font-size: 0.875rem;
+  color: var(--gray-light);
+  font-weight: 400;
+}
+
+/* Forgot password link */
+.forgot-link {
+  font-size: 0.875rem;
+  color: var(--gold);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color var(--transition), text-decoration var(--transition);
+}
+
+.forgot-link:hover {
+  color: var(--gold-dark);
+  text-decoration: underline;
+}
+
+/* ── Login button ── */
+.btn-login {
+  width: 100%;
+  height: 52px;
+  background: linear-gradient(135deg, var(--gold) 0%, var(--gold-dark) 100%);
+  color: var(--black);
+  border: none;
+  border-radius: var(--radius-btn);
+  font-family: var(--font);
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  box-shadow: var(--shadow-btn);
+  transition:
+    background var(--transition),
+    transform var(--transition),
+    box-shadow var(--transition);
+}
+
+.btn-login i {
+  font-size: 20px;
+}
+
+/* Hover — darken + lift */
+.btn-login:hover {
+  background: linear-gradient(135deg, #c9a424 0%, #a07c14 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 32px rgba(212,175,55,0.50);
+}
+
+/* Active click — press down */
+.btn-login:active {
+  transform: translateY(1px) scale(0.985);
+  box-shadow: 0 4px 12px rgba(212,175,55,0.30);
+}
+
+/* Disabled */
+.btn-login:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Keyboard focus ring */
+.btn-login:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+}
+
+/* ════════════════════════════════════════════
+   FOOTER
+════════════════════════════════════════════ */
+.page-footer {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  padding: 1.25rem 1rem;
+  font-size: 0.8rem;
+  color: var(--gray-muted);
+  font-weight: 300;
+  letter-spacing: 0.02em;
+}
+
+/* ════════════════════════════════════════════
+   RESPONSIVE — Tablet
+════════════════════════════════════════════ */
+@media (max-width: 520px) {
+  .login-card {
+    padding: 2.25rem 1.5rem 2rem;
+    border-radius: 12px;
+  }
+
+  .card-title { font-size: 1.5rem; }
+
+  .form-options {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+}
+
+/* ════════════════════════════════════════════
+   RESPONSIVE — Small mobile
+════════════════════════════════════════════ */
+@media (max-width: 360px) {
+  body { padding: 1rem 0.75rem; }
+
+  .login-card { padding: 2rem 1.25rem 1.75rem; }
+
+  .card-title { font-size: 1.3rem; }
+
+  .admin-icon { width: 60px; height: 60px; }
+  .admin-icon i { font-size: 26px; }
+}

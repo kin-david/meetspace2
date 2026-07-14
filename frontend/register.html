@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tenant Register</title>
+  <link rel="stylesheet" href="./auth.css" />
+</head>
+<body>
+  <main class="auth-shell">
+    <h1>Create Tenant Account</h1>
+    <p class="helper">Register with a valid email domain and verify your email.</p>
+
+    <form id="registerForm">
+      <label for="full_name">Full name *</label>
+      <input id="full_name" name="full_name" type="text" placeholder="John Doe" required />
+
+      <label for="email">Email *</label>
+      <input id="email" name="email" type="email" placeholder="" required />
+
+      <label for="phone_number">Phone number</label>
+      <input id="phone_number" name="phone_number" type="tel" placeholder="+254712345678" />
+
+      <label for="password">Password *</label>
+      <div class="password-container">
+        <input id="password" name="password" type="password" placeholder="Min 8 chars, uppercase, number, special" required />
+        <input type="checkbox" id="toggle-password" class="password-toggle" onchange="togglePasswordVisibility('password', this)" />
+        <label for="toggle-password" class="password-toggle-label">👁️</label>
+      </div>
+      <div class="strength-bar">
+        <div id="strength-meter" class="strength-meter"></div>
+      </div>
+      <span id="strength-label" class="strength-label">Password strength</span>
+
+      <label for="confirm_password">Confirm password *</label>
+      <div class="password-container">
+        <input id="confirm_password" name="confirm_password" type="password" placeholder="Re-enter password" required />
+        <input type="checkbox" id="toggle-confirm-password" class="password-toggle" onchange="togglePasswordVisibility('confirm_password', this)" />
+        <label for="toggle-confirm-password" class="password-toggle-label">👁️</label>
+      </div>
+
+      <button type="submit" class="submit-btn">Create account</button>
+      <div class="links">
+        <a href="../index.html">Already have an account? Login</a>
+      </div>
+      <div id="message" class="notice"></div>
+    </form>
+  </main>
+  <script src="./js/register.js"></script>
+</body>
+</html>

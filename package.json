@@ -1,0 +1,11 @@
+{
+  "scripts": {
+    "backend": "npm --prefix backend run start",
+    "frontend": "serve . -l 5500",
+    "full-start": "concurrently \"npm run backend\" \"npm run frontend\""
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1",
+    "serve": "^14.2.4"
+  }
+}

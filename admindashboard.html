@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>MeetSpace — Admin Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&family=DM+Serif+Display&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css"/>
+<link rel="stylesheet" href="admindashboard.css"/>
+</head>
+</head>
+<body>
+
+<div class="layout">
+
+<!-- ════════════════════════════════
+     SIDEBAR
+════════════════════════════════ -->
+<aside class="sidebar">
+  <div class="sb-brand">
+    <div class="sb-brand-icon"><i class="ti ti-building"></i></div>
+    <div>
+      <div class="sb-brand-name">MeetSpace</div>
+      <div class="sb-brand-sub">Admin Panel</div>
+    </div>
+  </div>
+
+  <div class="sb-admin-chip">
+    <div class="sb-av">AK</div>
+    <div>
+      <div class="sb-av-name">Admin K.</div>
+      <div class="sb-av-role">Administrator</div>
+    </div>
+    <div class="sb-av-dot"></div>
+  </div>
+
+  <nav class="sb-nav">
+    <div class="sb-section">Main</div>
+    <button class="sb-item active" onclick="switchTab('overview')"><i class="ti ti-layout-dashboard"></i> Overview</button>
+    <button class="sb-item" onclick="switchTab('bookings')"><i class="ti ti-calendar-check"></i> Bookings<span class="sb-badge">8</span></button>
+    <button class="sb-item" onclick="switchTab('rooms')"><i class="ti ti-door"></i> Rooms</button>
+    <button class="sb-item" onclick="switchTab('tenants')"><i class="ti ti-users"></i> Tenants</button>
+    <button class="sb-item" onclick="switchTab('payments')"><i class="ti ti-currency-dollar"></i> Payments</button>
+    <button class="sb-item" onclick="switchTab('reports')"><i class="ti ti-chart-bar"></i> Reports</button>
+
+    <div class="sb-section">System</div>
+    <button class="sb-item" onclick="switchTab('notifications')"><i class="ti ti-bell"></i> Notifications<span class="sb-badge" id="notif-sb-count">5</span></button>
+    <button class="sb-item"><i class="ti ti-settings"></i> Settings</button>
+    <button class="sb-item"><i class="ti ti-help-circle"></i> Support</button>
+  </nav>
+
+  <div class="sb-footer">
+    <button class="sb-logout" onclick="adminLogout()">
+      <i class="ti ti-logout"></i> Sign out
+    </button>
+  </div>
+</aside>
+
+<!-- ════════════════════════════════
+     MAIN
+════════════════════════════════ -->
+<div class="main">
+
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-title" id="page-title">Dashboard Overview</div>
+      <div class="topbar-sub" id="page-sub">Thursday, 19 June 2026 · Kilimani, Nairobi</div>
+    </div>
+    <div class="topbar-right">
+      <div class="search-wrap">
+        <i class="ti ti-search"></i>
+        <input class="search-input" type="text" placeholder="Search bookings, tenants…"/>
+      </div>
+      <button class="icon-btn" onclick="switchTab('notifications')">
+        <i class="ti ti-bell"></i>
+        <div class="notif-dot" id="notif-topbar-dot"></div>
+      </button>
+      <button class="icon-btn"><i class="ti ti-refresh"></i></button>
+      <button class="btn-primary" onclick="openNewBooking()">
+        <i class="ti ti-plus"></i> New booking
+      </button>
+    </div>
+  </header>
+
+  <!-- PAGE BODY -->
+  <div class="page-body">
+
+    <!-- PAGE TABS -->
+    <div class="page-tabs">
+      <button class="page-tab active" data-tab="overview">Overview</button>
+      <button class="page-tab" data-tab="bookings">Bookings</button>
+      <button class="page-tab" data-tab="rooms">Rooms</button>
+      <button class="page-tab" data-tab="tenants">Tenants</button>
+      <button class="page-tab" data-tab="payments">Payments</button>
+      <button class="page-tab" data-tab="reports">Reports</button>
+      <button class="page-tab" data-tab="notifications">Notifications</button>
+    </div>
+
+    <!-- ══════════════════════════
+         PANEL: OVERVIEW
+    ══════════════════════════ -->
+    <div id="panel-overview">
+
+      <!-- Stat cards -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-top">
+            <div class="stat-icon si-blue"><i class="ti ti-calendar-check"></i></div>
+            <div class="stat-trend tr-up"><i class="ti ti-trending-up"></i> +12%</div>
+          </div>
+          <div class="stat-label">Total bookings</div>
+          <div class="stat-val">248</div>
+          <div class="stat-sub">↑ 27 from last month</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top">
+            <div class="stat-icon si-green"><i class="ti ti-door"></i></div>
+            <div class="stat-trend tr-up"><i class="ti ti-trending-up"></i> 60%</div>
+          </div>
+          <div class="stat-label">Rooms available</div>
+          <div class="stat-val">3<span style="font-size:16px;color:var(--text-3);font-weight:400"> / 5</span></div>
+          <div class="stat-sub">2 currently occupied</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top">
+            <div class="stat-icon si-purple"><i class="ti ti-users"></i></div>
+            <div class="stat-trend tr-up"><i class="ti ti-trending-up"></i> +3</div>
+          </div>
+          <div class="stat-label">Active tenants</div>
+          <div class="stat-val">18</div>
+          <div class="stat-sub">3 new this month</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top">
+            <div class="stat-icon si-amber"><i class="ti ti-clock"></i></div>
+            <div class="stat-trend tr-ne">Today</div>
+          </div>
+          <div class="stat-label">Today's bookings</div>
+          <div class="stat-val">8</div>
+          <div class="stat-sub">Next at 14:00 – Focus Rm B</div>
+        </div>
+      </div>
+
+      <!-- Row 1: Chart + Room status + Calendar -->
+      <div class="row row-3">
+
+        <!-- Booking trend chart -->
+        <div class="card">
+          <div class="card-hdr">
+            <div>
+              <div class="card-title">Booking trends</div>
+              <div class="card-subtitle">Daily bookings · June 2026</div>
+            </div>
+            <button class="card-link">Export <i class="ti ti-download"></i></button>
+          </div>
+          <div class="chart-area">
+            <div class="bar-chart" id="trend-chart"></div>
+          </div>
+          <div class="chart-legend">
+            <div class="leg-item"><div class="leg-dot" style="background:var(--blue)"></div>Confirmed</div>
+            <div class="leg-item"><div class="leg-dot" style="background:var(--red-lt);border:1px solid var(--red)"></div>Cancelled</div>
+          </div>
+        </div>
+
+        <!-- Room status + Calendar stacked -->
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <div class="card">
+            <div class="card-hdr">
+              <div class="card-title">Room status</div>
+              <button class="card-link" onclick="switchTab('rooms')">Manage <i class="ti ti-arrow-right"></i></button>
+            </div>
+            <div class="room-list" id="room-status-list"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Row 2: Recent bookings + Activity + Notifications -->
+      <div class="row row-2">
+
+        <!-- Recent bookings -->
+        <div class="card">
+          <div class="card-hdr">
+            <div>
+              <div class="card-title">Recent bookings</div>
+              <div class="card-subtitle">Latest 5 reservations</div>
+            </div>
+            <button class="card-link" onclick="switchTab('bookings')">View all <i class="ti ti-arrow-right"></i></button>
+          </div>
+          <div style="overflow-x:auto">
+            <table class="data-table" id="recent-table"></table>
+          </div>
+        </div>
+
+        <!-- Activity + Occupancy stacked -->
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <!-- Live activity -->
+          <div class="card">
+            <div class="card-hdr">
+              <div class="card-title">Live activity</div>
+              <button class="card-link" onclick="clearActivity()">Clear</button>
+            </div>
+            <div class="activity-list" id="activity-feed"></div>
+          </div>
+
+          <!-- Occupancy -->
+          <div class="card">
+            <div class="card-hdr">
+              <div class="card-title">Room occupancy</div>
+              <div class="card-subtitle">This month</div>
+            </div>
+            <div class="card-body">
+              <div class="occ-list" id="occ-list"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Row 3: Mini calendar + Donut + Quick stats -->
+      <div class="row row-3r">
+        <div class="card">
+          <div class="card-hdr">
+            <div class="card-title">Booking calendar</div>
+            <div style="display:flex;gap:6px">
+              <button class="cal-nav-btn"><i class="ti ti-chevron-left"></i></button>
+              <button class="cal-nav-btn"><i class="ti ti-chevron-right"></i></button>
+            </div>
+          </div>
+          <div class="mini-cal">
+            <div class="cal-month">June 2026</div>
+            <div style="margin-top:10px" class="cal-grid" id="cal-grid"></div>
+            <div class="cal-legend">
+              <span><span style="width:8px;height:8px;border-radius:50%;background:var(--blue);display:inline-block"></span>Today</span>
+              <span><span style="width:8px;height:8px;border-radius:50%;background:var(--blue-lt);border:1px solid var(--blue);display:inline-block"></span>Has bookings</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <!-- Booking status donut -->
+          <div class="card">
+            <div class="card-hdr">
+              <div class="card-title">Status breakdown</div>
+              <div class="card-subtitle">This month</div>
+            </div>
+            <div class="card-body" style="display:flex;align-items:center;gap:20px">
+              <div class="donut-wrap">
+                <svg viewBox="0 0 36 36">
+                  <circle cx="18" cy="18" r="15.9" fill="none" stroke="#E8F5E9" stroke-width="3.5"/>
+                  <!-- Completed 65% -->
+                  <circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--green)" stroke-width="3.5"
+                    stroke-dasharray="65 35" stroke-dashoffset="0"/>
+                  <!-- Upcoming 25% -->
+                  <circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--blue)" stroke-width="3.5"
+                    stroke-dasharray="25 75" stroke-dashoffset="-65"/>
+                  <!-- Cancelled 10% -->
+                  <circle cx="18" cy="18" r="15.9" fill="none" stroke="var(--red)" stroke-width="3.5"
+                    stroke-dasharray="10 90" stroke-dashoffset="-90"/>
+                </svg>
+                <div class="donut-center">
+                  <div class="donut-val">248</div>
+                  <div class="donut-lbl">total</div>
+                </div>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:9px;flex:1">
+                <div style="display:flex;align-items:center;justify-content:space-between">
+                  <div style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--text-2)">
+                    <div style="width:9px;height:9px;border-radius:50%;background:var(--green)"></div>Completed
+                  </div>
+                  <span style="font-size:12px;font-weight:600;color:var(--text)">161 (65%)</span>
+                </div>
+                <div style="display:flex;align-items:center;justify-content:space-between">
+                  <div style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--text-2)">
+                    <div style="width:9px;height:9px;border-radius:50%;background:var(--blue)"></div>Upcoming
+                  </div>
+                  <span style="font-size:12px;font-weight:600;color:var(--text)">62 (25%)</span>
+                </div>
+                <div style="display:flex;align-items:center;justify-content:space-between">
+                  <div style="display:flex;align-items:center;gap:7px;font-size:12px;color:var(--text-2)">
+                    <div style="width:9px;height:9px;border-radius:50%;background:var(--red)"></div>Cancelled
+                  </div>
+                  <span style="font-size:12px;font-weight:600;color:var(--text)">25 (10%)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick metrics -->
+          <div class="card">
+            <div class="quick-stats">
+              <div class="qs-item">
+                <div class="qs-val" style="color:var(--green)">94%</div>
+                <div class="qs-lbl">Satisfaction</div>
+              </div>
+              <div class="qs-item">
+                <div class="qs-val">1h 42m</div>
+                <div class="qs-lbl">Avg duration</div>
+              </div>
+              <div class="qs-item">
+                <div class="qs-val" style="color:var(--red)">0</div>
+                <div class="qs-lbl">Conflicts</div>
+              </div>
+            </div>
+            <div class="quick-stats" style="border-top:none;padding-top:0">
+              <div class="qs-item">
+                <div class="qs-val" style="color:var(--purple)">KES 48k</div>
+                <div class="qs-lbl">Revenue</div>
+              </div>
+              <div class="qs-item">
+                <div class="qs-val">71%</div>
+                <div class="qs-lbl">Occupancy</div>
+              </div>
+              <div class="qs-item">
+                <div class="qs-val" style="color:var(--amber)">3</div>
+                <div class="qs-lbl">Pending</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════
+         PANEL: BOOKINGS
+    ══════════════════════════ -->
+    <div id="panel-bookings" style="display:none">
+      <div class="card">
+        <div class="card-hdr">
+          <div>
+            <div class="card-title">All bookings</div>
+            <div class="card-subtitle" id="bk-count">248 total reservations</div>
+          </div>
+          <div style="display:flex;gap:8px">
+            <select style="padding:6px 10px;border:1px solid var(--border-med);border-radius:var(--r-md);font-family:inherit;font-size:12px;color:var(--text);background:var(--surface);outline:none">
+              <option>All status</option><option>Upcoming</option><option>Completed</option><option>Cancelled</option>
+            </select>
+            <button class="btn-primary" onclick="openNewBooking()"><i class="ti ti-plus"></i> New booking</button>
+          </div>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="data-table" id="all-bookings-table"></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════
+         PANEL: ROOMS
+    ══════════════════════════ -->
+    <div id="panel-rooms" style="display:none">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:14px">
+        <button class="btn-primary" onclick="addRoom()"><i class="ti ti-plus"></i> Add room</button>
+      </div>
+      <div class="row row-2" id="rooms-grid"></div>
+    </div>
+
+    <!-- ══════════════════════════
+         PANEL: TENANTS
+    ══════════════════════════ -->
+    <div id="panel-tenants" style="display:none">
+      <div class="card">
+        <div class="card-hdr">
+          <div>
+            <div class="card-title">Tenants</div>
+            <div class="card-subtitle">18 registered tenants</div>
+          </div>
+          <button class="btn-primary"><i class="ti ti-user-plus"></i> Add tenant</button>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="data-table" id="tenants-table"></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════
+         PANEL: PAYMENTS
+    ══════════════════════════ -->
+    <div id="panel-payments" style="display:none">
+      <div class="stats-grid" style="margin-bottom:20px">
+        <div class="stat-card">
+          <div class="stat-top"><div class="stat-icon si-green"><i class="ti ti-currency-dollar"></i></div><div class="stat-trend tr-up">Collected</div></div>
+          <div class="stat-label">Total paid</div>
+          <div class="stat-val" id="paid-total">KES 0</div>
+          <div class="stat-sub" id="paid-total-sub">From confirmed bookings</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top"><div class="stat-icon si-blue"><i class="ti ti-wallet"></i></div><div class="stat-trend tr-ne">Pending</div></div>
+          <div class="stat-label">Pending payments</div>
+          <div class="stat-val" id="paid-pending">0</div>
+          <div class="stat-sub">Awaiting card or M-Pesa confirmation</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top"><div class="stat-icon si-amber"><i class="ti ti-credit-card"></i></div><div class="stat-trend tr-up">Card</div></div>
+          <div class="stat-label">Card payments</div>
+          <div class="stat-val" id="paid-card">KES 0</div>
+          <div class="stat-sub">Processed by card</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top"><div class="stat-icon si-purple"><i class="ti ti-phone"></i></div><div class="stat-trend tr-up">M-Pesa</div></div>
+          <div class="stat-label">M-Pesa payments</div>
+          <div class="stat-val" id="paid-mpesa">KES 0</div>
+          <div class="stat-sub">Collected via mobile money</div>
+        </div>
+      </div>
+
+      <div class="row row-2">
+        <div class="card">
+          <div class="card-hdr">
+            <div>
+              <div class="card-title">Payment tracking</div>
+              <div class="card-subtitle">Booking amount, method, and collection status</div>
+            </div>
+          </div>
+          <div style="overflow-x:auto">
+            <table class="data-table" id="payments-table"></table>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-hdr">
+            <div>
+              <div class="card-title">Revenue by room</div>
+              <div class="card-subtitle">Amount paid per space</div>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="occ-list" id="room-revenue-list"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════
+         PANEL: REPORTS
+    ══════════════════════════ -->
+    <div id="panel-reports" style="display:none">
+      <div class="stats-grid" style="margin-bottom:20px">
+        <div class="stat-card">
+          <div class="stat-top"><div class="stat-icon si-purple"><i class="ti ti-currency-dollar"></i></div><div class="stat-trend tr-up">↑ 18%</div></div>
+          <div class="stat-label">Monthly revenue</div>
+          <div class="stat-val">KES 48,200</div>
+          <div class="stat-sub">vs KES 40,800 last month</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top"><div class="stat-icon si-blue"><i class="ti ti-chart-area"></i></div><div class="stat-trend tr-up">↑ 5%</div></div>
+          <div class="stat-label">Avg occupancy</div>
+          <div class="stat-val">71%</div>
+          <div class="stat-sub">Peak: Boardroom A at 85%</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top"><div class="stat-icon si-green"><i class="ti ti-calendar-stats"></i></div><div class="stat-trend tr-ne">—</div></div>
+          <div class="stat-label">Total room-hours</div>
+          <div class="stat-val">416h</div>
+          <div class="stat-sub">Across 5 rooms this month</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-top"><div class="stat-icon si-amber"><i class="ti ti-star"></i></div><div class="stat-trend tr-up">↑ 2%</div></div>
+          <div class="stat-label">Tenant satisfaction</div>
+          <div class="stat-val">94%</div>
+          <div class="stat-sub">Based on 42 ratings</div>
+        </div>
+      </div>
+      <div class="row row-2">
+        <div class="card">
+          <div class="card-hdr"><div class="card-title">Room usage this month</div></div>
+          <div class="card-body">
+            <div class="occ-list" id="report-occ"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-hdr"><div class="card-title">Top tenants by bookings</div></div>
+          <div class="activity-list" id="top-tenants"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════
+         PANEL: NOTIFICATIONS
+    ══════════════════════════ -->
+    <div id="panel-notifications" style="display:none">
+      <div class="card">
+        <div class="card-hdr">
+          <div>
+            <div class="card-title">Notifications</div>
+            <div class="card-subtitle" id="notif-count-label">5 unread</div>
+          </div>
+          <button class="card-link" onclick="markAllRead()">Mark all read</button>
+        </div>
+        <div class="notif-stack" id="notif-list" style="padding-top:16px"></div>
+      </div>
+    </div>
+
+  </div><!-- end page-body -->
+</div><!-- end main -->
+</div><!-- end layout -->
+
+<!-- TOAST -->
+<div id="toast"><i class="ti ti-circle-check" id="toast-icon"></i><span id="toast-msg"></span></div>
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<script src="admindashboard.js"></script> 
+</body>
+</html>

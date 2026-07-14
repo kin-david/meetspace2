@@ -1,0 +1,78 @@
+# MeetSpace Project
+
+Meeting room booking app with:
+- Frontend auth pages in `frontend/`
+- Tenant dashboard at `tenantdashboard.html`
+- Admin login/dashboard at `adminlogin.html` and `admindashboard.html`
+- Backend API in `backend/` (Express + SQLite runtime)
+
+## Current Status
+
+- Tenant auth flow: register, verify, login, forgot/reset password, infinite session
+- Protected tenant dashboard with auth/session check on load
+- Admin login flow with protected admin dashboard entry
+- Rooms, bookings, and tenants API routes available under `/api/*`
+
+## Requirements
+
+- Node.js 18+
+- npm
+
+## Install
+
+From project root:
+
+```bash
+npm install
+```
+
+From backend folder:
+
+```bash
+cd backend
+npm install
+```
+
+## Environment
+
+Copy `backend/.env.example` to `backend/.env` and set values.
+
+Minimum required for local auth testing:
+- `PORT`
+- `JWT_SECRET`
+- `SESSION_SECRET`
+- `CLIENT_URL`
+
+Optional for full features:
+- SMTP values for verification/reset emails
+
+## Run
+
+From project root:
+
+```bash
+npm run full-start
+```
+
+This starts:
+- Backend API on `http://localhost:5000`
+- Static frontend server on `http://localhost:5500`
+
+## Main URLs
+
+- Localhost base link: `http://localhost:5500/index.html`
+- Tenant login: `http://localhost:5500/index.html`
+- Tenant register: `http://localhost:5500/frontend/register.html`
+- Tenant dashboard: `http://localhost:5500/tenantdashboard.html`
+- Admin login: `http://localhost:5500/adminlogin.html`
+- Admin dashboard: `http://localhost:5500/admindashboard.html`
+
+## API Quick Check
+
+- Health endpoint: `GET http://localhost:5000/health`
+- Auth base: `http://localhost:5000/api/auth`
+
+## Notes
+
+- The backend runtime currently uses SQLite via `backend/config/db.js`.
+- `backend/schema.sql` is a MySQL schema reference and is not required for the active SQLite path.

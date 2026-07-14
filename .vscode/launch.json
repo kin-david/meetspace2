@@ -1,0 +1,22 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        
+
+        {
+            "type": "chrome",
+            "request": "launch",
+            "name": "Launch Frontend",
+            "url": "http://localhost:5500/index.html",
+            "webRoot": "${workspaceFolder}"
+        },
+        {
+            "type": "node",
+            "request": "launch",
+            "name": "Launch Backend",
+            "program": "${workspaceFolder}/backend/server.js",
+            "cwd": "${workspaceFolder}/backend",
+            "env": {}
+        }
+    ]
+}

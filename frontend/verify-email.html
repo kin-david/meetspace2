@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Verify Email</title>
+  <link rel="stylesheet" href="./auth.css" />
+</head>
+<body>
+  <main class="auth-shell">
+    <h1>Email Verification</h1>
+    <p class="helper">Paste a token to verify manually if needed.</p>
+
+    <form id="verifyForm">
+      <label for="token">Verification token</label>
+      <input id="token" name="token" type="text" required />
+      <button type="submit">Verify email</button>
+      <div id="message" class="notice"></div>
+    </form>
+  </main>
+  <script src="./js/verifyEmail.js"></script>
+</body>
+</html>

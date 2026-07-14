@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>MeetSpace — Booking System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Serif+Display&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css"/>
+  <link rel="stylesheet" href="tenantdashboard.css"/>
+</head>
+<body>
+
+<div class="layout">
+
+  <!-- ════════════════════════════════
+       SIDEBAR
+  ════════════════════════════════ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-logo">
+      <div class="sb-icon"><i class="ti ti-building"></i></div>
+      <div>
+        <div class="sb-name">MeetSpace</div>
+        <div class="sb-sub">Kilimani, Nairobi</div>
+      </div>
+    </div>
+
+    <div class="nav-sec">Menu</div>
+    <button class="nav-item active" data-tab="dashboard"><i class="ti ti-layout-dashboard"></i> Dashboard</button>
+    <button class="nav-item" data-tab="rooms"><i class="ti ti-door"></i> Room Availability</button>
+    <button class="nav-item" data-tab="calendar"><i class="ti ti-calendar"></i> Calendar</button>
+    <button class="nav-item" data-tab="my-bookings"><i class="ti ti-calendar-check"></i> My Bookings</button>
+    <button class="nav-item" data-tab="recent"><i class="ti ti-history"></i> Recent Bookings</button>
+
+    <div class="nav-sec">Account</div>
+    <button class="nav-item" id="notif-bell-wrap" onclick="openNotifPanel()">
+      <i class="ti ti-bell"></i> Notifications
+      <span id="notif-count-badge" style="margin-left:auto;background:var(--blue);color:#fff;font-size:10px;font-weight:600;padding:1px 6px;border-radius:99px;display:none">0</span>
+    </button>
+    <button class="nav-item"><i class="ti ti-settings"></i> Settings</button>
+
+    <div class="nav-sec" style="margin-top:2rem;margin-bottom:0.5rem;border-top:1px solid var(--border);padding-top:1rem">Admin</div>
+    <button class="nav-item" onclick="window.location.href='./adminlogin.html'" style="color:var(--amber);font-weight:600">
+      <i class="ti ti-shield-lock"></i> Admin Portal
+    </button>
+
+    <div class="sb-bottom">
+      <div class="user-chip">
+        <div class="u-av" id="sb-av">TU</div>
+        <div>
+          <div class="u-name" id="sb-uname">Tenant User</div>
+          <div class="u-role">Tenant</div>
+        </div>
+      </div>
+      <button class="logout-btn" onclick="logout()">
+        <i class="ti ti-logout"></i> Sign out
+      </button>
+    </div>
+  </aside>
+
+  <!-- ════════════════════════════════
+       MAIN CONTENT
+  ════════════════════════════════ -->
+  <main class="main">
+
+    <!-- Top bar -->
+    <div class="topbar">
+      <div>
+        <div class="topbar-title" id="greeting">Welcome back!</div>
+        <div class="topbar-sub"  id="today-date"></div>
+      </div>
+      <div class="topbar-right">
+        <div class="notif-wrap" id="notif-bell-wrap" onclick="openNotifPanel()" aria-label="Notifications">
+          <i class="ti ti-bell"></i>
+          <div class="notif-dot" id="notif-dot" style="display:none"></div>
+        </div>
+        <button class="notif-wrap" onclick="window.location.href='./adminlogin.html'" aria-label="Admin Portal" title="Admin Portal" style="cursor:pointer;color:var(--amber)">
+          <i class="ti ti-shield-lock"></i>
+        </button>
+        <button class="btn-primary" onclick="openBookingModal()">
+          <i class="ti ti-plus"></i> Book a room
+        </button>
+      </div>
+    </div>
+
+    <!-- Page-level tabs -->
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="dashboard">Dashboard</button>
+      <button class="tab-btn" data-tab="rooms">Rooms</button>
+      <button class="tab-btn" data-tab="calendar">Calendar</button>
+      <button class="tab-btn" data-tab="my-bookings">My Bookings</button>
+      <button class="tab-btn" data-tab="recent">Recent</button>
+    </div>
+
+    <!-- ══════════════════════════
+         PANEL: DASHBOARD
+    ══════════════════════════ -->
+    <div id="panel-dashboard" class="tab-panel">
+
+      <!-- Stats -->
+      <div class="stats">
+        <div class="stat-card">
+          <div class="stat-icon"><i class="ti ti-door"></i></div>
+          <div class="stat-label">Rooms available</div>
+          <div class="stat-val" id="stat-available">—</div>
+          <div class="stat-trend t-up">Ready to book now</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon"><i class="ti ti-calendar-check"></i></div>
+          <div class="stat-label">Total bookings</div>
+          <div class="stat-val" id="stat-my-bookings">—</div>
+          <div class="stat-trend t-ne">All time</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon"><i class="ti ti-clock"></i></div>
+          <div class="stat-label">Upcoming</div>
+          <div class="stat-val" id="stat-upcoming">—</div>
+          <div class="stat-trend t-up">Confirmed</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon"><i class="ti ti-circle-x"></i></div>
+          <div class="stat-label">Cancelled</div>
+          <div class="stat-val" id="stat-cancelled">—</div>
+          <div class="stat-trend t-ne">This account</div>
+        </div>
+      </div>
+
+      <!-- Room status quick view -->
+      <div class="g2">
+        <div class="card">
+          <div class="card-hdr">
+            <div class="card-title">Room status</div>
+            <button class="card-link" onclick="switchTab('rooms')">View all rooms</button>
+          </div>
+          <table class="room-table" id="dash-rooms-table">
+            <tbody id="rooms-tbody"></tbody>
+          </table>
+        </div>
+
+        <!-- Today's timeline -->
+        <div class="card">
+          <div class="card-hdr">
+            <div class="card-title">Today's schedule</div>
+            <button class="card-link" onclick="switchTab('calendar')">Full calendar</button>
+          </div>
+          <div id="today-timeline">
+            <div class="empty-state" style="padding:1.5rem">
+              <i class="ti ti-calendar-event"></i>
+              <p>No bookings today yet.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- My recent bookings summary -->
+      <div class="card">
+        <div class="card-hdr">
+          <div class="card-title">My bookings</div>
+          <button class="card-link" onclick="switchTab('my-bookings')">View all</button>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="bookings-table">
+            <thead>
+              <tr>
+                <th>Meeting title</th>
+                <th>Room</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="dash-bookings-tbody">
+              <tr><td colspan="6"><div class="empty-state"><i class="ti ti-calendar-off"></i><p>No bookings yet.</p></div></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ══════════════════════════
+         PANEL: ROOM AVAILABILITY
+    ══════════════════════════ -->
+    <div id="panel-rooms" class="tab-panel" style="display:none">
+      <div class="card">
+        <div class="card-hdr">
+          <div class="card-title">Room availability</div>
+          <button class="btn-primary" onclick="openBookingModal()">
+            <i class="ti ti-plus"></i> New booking
+          </button>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="room-table">
+            <thead>
+              <tr>
+                <th>Room</th>
+                <th>Capacity</th>
+                <th>Floor</th>
+                <th>Status</th>
+                <th>Next booking</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="rooms-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════
+         PANEL: CALENDAR
+    ══════════════════════════ -->
+    <div id="panel-calendar" class="tab-panel" style="display:none">
+      <div class="card">
+        <div class="cal-view-tabs">
+          <button class="cal-view-btn active" data-view="month">Month</button>
+          <button class="cal-view-btn"        data-view="week">Week</button>
+          <button class="cal-view-btn"        data-view="day">Day</button>
+        </div>
+        <div class="cal-nav">
+          <div class="cal-nav-title" id="cal-view-label">June 2026</div>
+          <div style="display:flex;gap:6px;align-items:center">
+            <button class="cal-nav-btn" onclick="calNav(-1)"><i class="ti ti-chevron-left"></i></button>
+            <button class="cal-nav-btn" onclick="calToday()">Today</button>
+            <button class="cal-nav-btn" onclick="calNav(1)"><i class="ti ti-chevron-right"></i></button>
+          </div>
+        </div>
+        <div id="cal-body"></div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════
+         PANEL: MY BOOKINGS
+    ══════════════════════════ -->
+    <div id="panel-my-bookings" class="tab-panel" style="display:none">
+      <div class="card">
+        <div class="card-hdr">
+          <div class="card-title">My bookings</div>
+          <button class="btn-primary" onclick="openBookingModal()">
+            <i class="ti ti-plus"></i> New booking
+          </button>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="bookings-table">
+            <thead>
+              <tr>
+                <th>Title</th>
+                <th>Organizer</th>
+                <th>Room</th>
+                <th>Date</th>
+                <th>Time</th>
+                <th>Attendees</th>
+                <th>Status</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="my-bookings-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════
+         PANEL: RECENT BOOKINGS
+    ══════════════════════════ -->
+    <div id="panel-recent" class="tab-panel" style="display:none">
+      <div class="card">
+        <div class="card-hdr">
+          <div class="card-title">Recent bookings</div>
+        </div>
+        <div style="overflow-x:auto">
+          <table class="bookings-table">
+            <thead>
+              <tr>
+                <th>Meeting title</th>
+                <th>Organizer</th>
+                <th>Room</th>
+                <th>Date</th>
+                <th>Start</th>
+                <th>End</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="recent-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ════════════════════════════════
+     NOTIFICATIONS PANEL
+════════════════════════════════ -->
+<div class="notif-panel" id="notif-panel">
+  <div class="notif-panel-hdr">
+    <div class="notif-panel-title">Notifications</div>
+    <button class="notif-close" onclick="closeNotifPanel()" aria-label="Close">&times;</button>
+  </div>
+  <div class="notif-list" id="notif-list">
+    <div class="empty-state"><i class="ti ti-bell-off"></i><p>No notifications yet.</p></div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════
+     BOOKING MODAL
+════════════════════════════════ -->
+<div class="modal-overlay" id="booking-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+  <div class="modal-card">
+
+    <!-- Header -->
+    <div class="modal-hdr">
+      <div>
+        <div class="modal-title" id="modal-title">New booking</div>
+        <div class="modal-sub">Complete your booking within 5 minutes to secure the slot.</div>
+      </div>
+      <button class="modal-close" onclick="closeBookingModal()" aria-label="Close booking form">&times;</button>
+    </div>
+
+    <!-- 5-minute timer — auto-starts, no manual button -->
+    <div class="timer-strip">
+      <div class="timer-ring-wrap">
+        <svg width="60" height="60" viewBox="0 0 60 60" aria-hidden="true">
+          <circle cx="30" cy="30" r="22" fill="none" stroke="#E6F1FB" stroke-width="5"/>
+          <circle id="t-ring"
+            cx="30" cy="30" r="22"
+            fill="none"
+            stroke="#185FA5"
+            stroke-width="5"
+            stroke-dasharray="138.2"
+            stroke-dashoffset="0"
+            stroke-linecap="round"
+            transform="rotate(-90 30 30)"
+            style="transition: stroke-dashoffset 0.5s linear, stroke 0.5s;"/>
+        </svg>
+      </div>
+      <div class="timer-info">
+        <div style="display:flex; align-items:center; gap:10px; margin-bottom:3px;">
+          <div class="timer-countdown" id="t-countdown">05:00</div>
+          <div class="timer-badge tb-run" id="t-badge">Slot locked</div>
+        </div>
+        <div class="timer-note">Complete your booking before the timer expires to secure this slot.</div>
+        <div class="timer-bar-track">
+          <div class="timer-bar-fill" id="t-bar-fill" style="width:100%"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 1-minute warning -->
+    <div class="timer-alert warn" id="t-warn-alert">
+      <i class="ti ti-alert-triangle"></i>
+      Only 1 minute remaining. Please complete your booking.
+    </div>
+
+    <!-- Expired message -->
+    <div class="timer-alert exp" id="t-exp-alert">
+      <i class="ti ti-clock-off"></i>
+      Your booking session has expired. The room has been released and is now available for booking.
+    </div>
+
+    <!-- Double-booking conflict alert -->
+    <div class="conflict-alert" id="conflict-alert">
+      <i class="ti ti-alert-circle"></i>
+      This room is already booked during the selected time.
+    </div>
+
+    <!-- Booking form -->
+    <form id="booking-form" novalidate>
+
+      <div class="m-section">Meeting details</div>
+
+      <div class="m-field">
+        <label for="m-title">Meeting title <span style="color:#E24B4A">*</span></label>
+        <input type="text" id="m-title" placeholder="e.g. Weekly team standup" autocomplete="off"/>
+        <div class="field-err-msg" id="err-title">Please enter a meeting title.</div>
+      </div>
+
+      <div class="m-row">
+        <div class="m-field">
+          <label for="m-organizer">Organizer name <span style="color:#E24B4A">*</span></label>
+          <input type="text" id="m-organizer" placeholder="Full name" autocomplete="name"/>
+          <div class="field-err-msg" id="err-organizer">Please enter the organizer name.</div>
+        </div>
+        <div class="m-field">
+          <label for="m-email">Email <span style="color:#E24B4A">*</span></label>
+          <input type="email" id="m-email" placeholder="you@example.com" autocomplete="email"/>
+          <div class="field-err-msg" id="err-email">Please enter a valid email.</div>
+        </div>
+      </div>
+
+      <div class="m-field">
+        <label for="m-phone">Phone number</label>
+        <input type="tel" id="m-phone" placeholder="+254 700 000 000" autocomplete="tel"/>
+      </div>
+
+      <div class="m-section">Room &amp; time</div>
+
+      <div class="m-field">
+        <label for="m-room">Room <span style="color:#E24B4A">*</span></label>
+        <select id="m-room">
+          <option value="">Select a room...</option>
+        </select>
+        <div class="field-err-msg" id="err-room">Please select a room.</div>
+      </div>
+
+      <div class="m-row">
+        <div class="m-field">
+          <label for="m-date">Date <span style="color:#E24B4A">*</span></label>
+          <input type="date" id="m-date"/>
+          <div class="field-err-msg" id="err-date">Please select a date.</div>
+        </div>
+        <div class="m-field">
+          <label for="m-attendees">Attendees <span style="color:#E24B4A">*</span></label>
+          <input type="number" id="m-attendees" min="1" max="50" value="2" placeholder="Number of people"/>
+          <div class="field-err-msg" id="err-attendees">Please enter number of attendees.</div>
+        </div>
+      </div>
+
+      <div class="m-row-3">
+        <div class="m-field">
+          <label for="m-start">Start time <span style="color:#E24B4A">*</span></label>
+          <input type="time" id="m-start" value="09:00"/>
+          <div class="field-err-msg" id="err-start">Please select a start time.</div>
+        </div>
+        <div class="m-field">
+          <label for="m-dur">Duration</label>
+          <select id="m-dur">
+            <option value="30">30 minutes</option>
+            <option value="60" selected>1 hour</option>
+            <option value="90">1.5 hours</option>
+            <option value="120">2 hours</option>
+            <option value="180">3 hours</option>
+            <option value="240">4 hours</option>
+          </select>
+        </div>
+        <div class="m-field">
+          <label for="m-end">End time <span style="color:#E24B4A">*</span></label>
+          <input type="time" id="m-end" value="10:00"/>
+          <div class="field-err-msg" id="err-end">End time must be after start time.</div>
+        </div>
+      </div>
+
+      <div class="m-section">Additional info</div>
+
+      <div class="m-field">
+        <label for="m-purpose">Meeting purpose</label>
+        <input type="text" id="m-purpose" placeholder="e.g. Quarterly review, client demo..."/>
+      </div>
+
+      <div class="m-field">
+        <label for="m-notes">Additional notes</label>
+        <textarea id="m-notes" placeholder="Any special requirements, equipment needed, catering, etc."></textarea>
+      </div>
+
+    </form>
+
+    <div class="modal-footer">
+      <button class="btn-modal-cancel" onclick="closeBookingModal()">
+        <i class="ti ti-x" style="font-size:15px; vertical-align:-2px; margin-right:4px;"></i>Cancel
+      </button>
+      <button class="btn-confirm" id="btn-confirm-booking" onclick="confirmBooking()">
+        <i class="ti ti-check" style="font-size:15px; vertical-align:-2px; margin-right:4px;"></i>Confirm booking
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<!-- Toast notification -->
+<div id="toast"></div>
+
+<script src="tenantdashboard.js"></script>
+</body>
+</html>

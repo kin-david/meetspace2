@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="description" content="MeetSpace Sign in to book professional conference and meeting rooms."/>
+  <title>MeetSpace — Sign In</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+
+  <div class="login-wrap">
+
+    <!-- ══ LEFT PANEL ══ -->
+    <div class="login-left">
+
+      <!-- Brand -->
+      <div class="brand">
+        <div class="brand-icon"><i class="ti ti-building-community"></i></div>
+        <span class="brand-name">M E E T S P A C E</span>
+      </div>
+
+      <!-- Body copy -->
+      <div class="left-body">
+        <h2>Your workspace, <span class="left-accent">perfectly</span> booked.</h2>
+        <p>Sign in to browse, reserve, and manage professional meeting rooms and conference spaces — all in one place.</p>
+
+        <!-- Feature list removed as requested -->
+      </div>
+
+      <!-- Dot indicators -->
+      <div class="left-footer">
+        <div class="dot active"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+      </div>
+
+    </div><!-- end left panel -->
+
+    <!-- ══ RIGHT PANEL ══ -->
+    <div class="login-right">
+
+      <h1>Welcome back</h1>
+      <p class="subtitle">Sign in to your MeetSpace account.</p>
+
+      <!-- Social buttons moved below the form -->
+
+      <!-- Divider -->
+      <div class="divider">
+        <div class="divider-line"></div>
+        <span>or sign in with email</span>
+        <div class="divider-line"></div>
+      </div>
+
+      <!-- Form -->
+      <form id="login-form" novalidate autocomplete="off">
+
+        <!-- Full name -->
+        <div class="form-group">
+          <label for="full-name">Full name</label>
+          <div class="input-wrap">
+            <i class="ti ti-user" aria-hidden="true"></i>
+            <input
+              id="full-name"
+              type="text"
+              name="fullName"
+              placeholder="Enter your name"
+              autocomplete="off"
+              required
+              aria-required="true"
+              aria-describedby="name-err"
+            />
+          </div>
+          <span class="field-error" id="name-err" role="alert"></span>
+        </div>
+
+        <!-- Email -->
+        <div class="form-group">
+          <label for="email">Email address</label>
+          <div class="input-wrap">
+            <i class="ti ti-mail" aria-hidden="true"></i>
+            <input
+              id="email"
+              type="email"
+              name="email"
+              placeholder="you@example.com"
+              autocomplete="off"
+              required
+              aria-required="true"
+              aria-describedby="email-err"
+            />
+          </div>
+          <span class="field-error" id="email-err" role="alert"></span>
+        </div>
+
+        <!-- Password -->
+        <div class="form-group">
+          <label for="password">Password</label>
+          <div class="input-wrap">
+            <i class="ti ti-lock" aria-hidden="true"></i>
+            <input
+              id="password"
+              type="password"
+              name="password"
+              placeholder="••••••••"
+              autocomplete="off"
+              required
+              aria-required="true"
+              aria-describedby="pw-err"
+            />
+            <!-- Show / hide toggle -->
+            <button type="button" class="toggle-password" id="toggle-pw" aria-label="Show password" aria-pressed="false">
+              <i class="ti ti-eye-plus" id="eye-icon" aria-hidden="true"></i>
+            </button>
+          </div>
+          <span class="field-error" id="pw-err" role="alert"></span>
+        </div>
+
+        <!-- Forgot password -->
+        <div class="forgot-container">
+          <button type="button" class="forgot" id="create-password-btn">Forgot password?</button>
+        </div>
+
+        <!-- Error banner -->
+        <div class="form-banner" id="form-banner" role="alert" aria-live="assertive" style="display:none"></div>
+
+        <!-- Submit -->
+        <button class="btn-login" type="submit" id="btn-submit">
+          <span class="btn-text">Sign In</span>
+          <span class="btn-spinner" aria-hidden="true" style="display:none">
+            <i class="ti ti-loader spin"></i>
+          </span>
+        </button>
+
+      </form>
+
+
+      <!-- Sign up -->
+      <div class="signup-row">
+        Don't have an account? <a href="./frontend/register.html">Create one</a>
+      </div>
+
+    </div><!-- end right panel -->
+
+  </div><!-- end login-wrap -->
+
+  <!-- Password Reset Modal -->
+  <div id="pw-reset-overlay" class="pw-reset-overlay" role="dialog" aria-modal="true" aria-labelledby="pw-reset-title" style="display:none">
+    <div class="pw-reset-card">
+
+      <!-- Close -->
+      <button type="button" class="pw-reset-close" id="pw-reset-close" aria-label="Close">
+        <i class="ti ti-x"></i>
+      </button>
+
+      <!-- Step 1: Enter email -->
+      <div id="pw-step-1">
+        <div class="pw-reset-icon"><i class="ti ti-lock-open"></i></div>
+        <h2 id="pw-reset-title" class="pw-reset-title">Create new password</h2>
+        <p class="pw-reset-sub">Enter the email linked to your account and choose a new password.</p>
+
+        <div class="pw-form-group">
+          <label for="pr-email">Email address</label>
+          <div class="pw-input-wrap">
+            <i class="ti ti-mail"></i>
+            <input id="pr-email" type="email" placeholder="you@example.com" autocomplete="off" />
+          </div>
+          <span class="pw-field-err" id="pr-email-err"></span>
+        </div>
+
+        <div class="pw-form-group">
+          <label for="pr-new-pw">New password</label>
+          <div class="pw-input-wrap">
+            <i class="ti ti-lock"></i>
+            <input id="pr-new-pw" type="password" placeholder="Min 8 chars" autocomplete="new-password" />
+            <button type="button" class="pw-toggle" id="pr-toggle-new" aria-label="Show password">
+              <i class="ti ti-eye" id="pr-eye-new"></i>
+            </button>
+          </div>
+          <div class="pw-strength-bar" id="pr-strength-bar">
+            <div class="pw-strength-fill" id="pr-strength-fill"></div>
+          </div>
+          <span class="pw-strength-label" id="pr-strength-label"></span>
+          <span class="pw-field-err" id="pr-new-err"></span>
+        </div>
+
+        <div class="pw-form-group">
+          <label for="pr-confirm-pw">Confirm password</label>
+          <div class="pw-input-wrap">
+            <i class="ti ti-lock-check"></i>
+            <input id="pr-confirm-pw" type="password" placeholder="Repeat new password" autocomplete="new-password" />
+            <button type="button" class="pw-toggle" id="pr-toggle-confirm" aria-label="Show password">
+              <i class="ti ti-eye" id="pr-eye-confirm"></i>
+            </button>
+          </div>
+          <span class="pw-field-err" id="pr-confirm-err"></span>
+        </div>
+
+        <div class="pw-reset-banner" id="pw-reset-banner" style="display:none"></div>
+
+        <button type="button" class="pw-reset-btn" id="pw-reset-submit">
+          <span class="pw-btn-text">Update password</span>
+          <span class="pw-btn-spinner" style="display:none"><i class="ti ti-loader spin"></i></span>
+        </button>
+      </div>
+
+      <!-- Step 2: Success -->
+      <div id="pw-step-2" style="display:none; text-align:center">
+        <div class="pw-reset-icon pw-icon-success"><i class="ti ti-circle-check"></i></div>
+        <h2 class="pw-reset-title">Password updated!</h2>
+        <p class="pw-reset-sub">Your password has been changed successfully. You can now sign in with your new password.</p>
+        <button type="button" class="pw-reset-btn" id="pw-done-btn">Back to sign in</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- External JS -->
+  <script src="sessionManager.js"></script>
+  <script src="index.js" defer></script>
+
+</body>
+</html>
