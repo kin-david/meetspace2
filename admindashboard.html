@@ -333,7 +333,7 @@
             <div class="card-subtitle" id="bk-count">248 total reservations</div>
           </div>
           <div style="display:flex;gap:8px">
-            <select style="padding:6px 10px;border:1px solid var(--border-med);border-radius:var(--r-md);font-family:inherit;font-size:12px;color:var(--text);background:var(--surface);outline:none">
+            <select id="booking-status-filter" style="padding:6px 10px;border:1px solid var(--border-med);border-radius:var(--r-md);font-family:inherit;font-size:12px;color:var(--text);background:var(--surface);outline:none">
               <option>All status</option><option>Upcoming</option><option>Completed</option><option>Cancelled</option>
             </select>
             <button class="btn-primary" onclick="openNewBooking()"><i class="ti ti-plus"></i> New booking</button>
@@ -494,6 +494,126 @@
   </div><!-- end page-body -->
 </div><!-- end main -->
 </div><!-- end layout -->
+
+<!-- ════════════════════════════════
+     BOOKING MODAL
+════════════════════════════════ -->
+<div class="modal-overlay" id="booking-modal">
+  <div class="modal-box">
+    <div class="modal-hdr">
+      <div class="modal-title" id="bm-title">New booking</div>
+      <button class="modal-close" onclick="closeBookingModal()"><i class="ti ti-x"></i></button>
+    </div>
+    <form id="booking-form" onsubmit="return false">
+      <div class="modal-body">
+        <div class="modal-grid">
+          <div class="fg">
+            <label class="fl">Meeting title *</label>
+            <input class="fi" id="bm-meeting-title" type="text" placeholder="e.g. Team standup"/>
+          </div>
+          <div class="fg">
+            <label class="fl">Tenant *</label>
+            <select class="fi" id="bm-tenant">
+              <option value="">Select a tenant…</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label class="fl">Room *</label>
+            <select class="fi" id="bm-room">
+              <option value="">Select a room…</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label class="fl">Date *</label>
+            <input class="fi" id="bm-date" type="date"/>
+          </div>
+          <div class="fg">
+            <label class="fl">Start time *</label>
+            <input class="fi" id="bm-start" type="time"/>
+          </div>
+          <div class="fg">
+            <label class="fl">End time *</label>
+            <input class="fi" id="bm-end" type="time"/>
+          </div>
+          <div class="fg">
+            <label class="fl">Duration</label>
+            <select class="fi" id="bm-duration">
+              <option value="30">30 minutes</option>
+              <option value="60" selected>1 hour</option>
+              <option value="90">1.5 hours</option>
+              <option value="120">2 hours</option>
+              <option value="150">2.5 hours</option>
+              <option value="180">3 hours</option>
+              <option value="240">4 hours</option>
+              <option value="300">5 hours</option>
+              <option value="360">6 hours</option>
+              <option value="420">7 hours</option>
+              <option value="480">8 hours</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label class="fl">Attendees *</label>
+            <input class="fi" id="bm-attendees" type="number" min="1" max="100" value="1"/>
+          </div>
+          <div class="fg full-width">
+            <label class="fl">Purpose</label>
+            <textarea class="fi" id="bm-purpose" rows="2" placeholder="Brief description of the meeting…"></textarea>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" type="button" onclick="closeBookingModal()">Cancel</button>
+        <button class="btn-primary" type="button" onclick="submitBookingForm()">
+          <i class="ti ti-check"></i>Save booking
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- ════════════════════════════════
+     ROOM MODAL
+════════════════════════════════ -->
+<div class="modal-overlay" id="room-modal">
+  <div class="modal-box modal-box-sm">
+    <div class="modal-hdr">
+      <div class="modal-title" id="rm-modal-title">Add room</div>
+      <button class="modal-close" onclick="closeRoomModal()"><i class="ti ti-x"></i></button>
+    </div>
+    <form id="room-form" onsubmit="return false">
+      <div class="modal-body">
+        <div class="modal-grid">
+          <div class="fg full-width">
+            <label class="fl">Room name *</label>
+            <input class="fi" id="rm-name" type="text" placeholder="e.g. Boardroom A"/>
+          </div>
+          <div class="fg">
+            <label class="fl">Capacity *</label>
+            <input class="fi" id="rm-capacity" type="number" min="1" max="200" placeholder="10"/>
+          </div>
+          <div class="fg">
+            <label class="fl">Floor *</label>
+            <input class="fi" id="rm-floor" type="number" min="1" max="50" value="1"/>
+          </div>
+          <div class="fg full-width">
+            <label class="fl">Status</label>
+            <select class="fi" id="rm-status">
+              <option value="available">Available</option>
+              <option value="occupied">Occupied</option>
+              <option value="reserved">Reserved</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" type="button" onclick="closeRoomModal()">Cancel</button>
+        <button class="btn-primary" type="button" onclick="submitRoomForm()">
+          <i class="ti ti-check"></i>Save room
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
 
 <!-- TOAST -->
 <div id="toast"><i class="ti ti-circle-check" id="toast-icon"></i><span id="toast-msg"></span></div>

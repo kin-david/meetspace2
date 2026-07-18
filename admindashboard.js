@@ -423,7 +423,7 @@ function renderPayments() {
 function openNewBooking() {
   STATE.editingBooking = null;
   var modal = el('booking-modal');
-  if (!modal) { showToast('Booking form ready.', 'info'); return; }
+  if (!modal) return;
 
   /* Reset form */
   var form = el('booking-form');
@@ -432,8 +432,9 @@ function openNewBooking() {
   var titleEl = el('bm-title');
   if (titleEl) titleEl.textContent = 'New booking';
 
-  /* Populate room dropdown */
+  /* Populate dropdowns */
   populateRoomDropdown();
+  populateTenantDropdown();
 
   /* Default date = today */
   var dateField = el('bm-date');
@@ -448,9 +449,10 @@ function openEditBookingModal(id) {
   STATE.editingBooking = id;
 
   var modal = el('booking-modal');
-  if (!modal) { showToast('Edit: ' + b.title, 'info'); return; }
+  if (!modal) return;
 
   populateRoomDropdown();
+  populateTenantDropdown();
 
   setFieldVal('bm-meeting-title', b.title);
   setFieldVal('bm-tenant',    b.tenant);
@@ -703,6 +705,15 @@ function populateRoomDropdown() {
     + ROOMS.map(function(r) {
         return '<option value="' + r.id + '">' + r.name
           + ' — Cap: ' + r.capacity + ', Floor ' + r.floor + '</option>';
+      }).join('');
+}
+
+function populateTenantDropdown() {
+  var sel = el('bm-tenant');
+  if (!sel) return;
+  sel.innerHTML = '<option value="">Select a tenant…</option>'
+    + TENANTS.map(function(tn) {
+        return '<option value="' + tn.name + '">' + tn.name + '</option>';
       }).join('');
 }
 

@@ -496,3 +496,66 @@ a{text-decoration:none;color:inherit}
   .page-body{padding:16px}
   .topbar{padding:0 16px}
 }
+
+/* ══════════════════════════════════
+   MODAL
+═════════════════════════════════ */
+.modal-overlay{
+  display:none;position:fixed;inset:0;z-index:100;
+  background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);
+  align-items:center;justify-content:center;
+  padding:20px;
+}
+.modal-overlay.open{display:flex}
+
+.modal-box{
+  background:var(--surface);border:1px solid var(--border-med);
+  border-radius:var(--r-lg);box-shadow:var(--shadow-lg);
+  width:100%;max-width:600px;max-height:90vh;overflow-y:auto;
+}
+.modal-box-sm{max-width:440px}
+
+.modal-hdr{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 24px;border-bottom:1px solid var(--border);
+}
+.modal-title{font-size:16px;font-weight:600;color:var(--text)}
+.modal-close{
+  width:30px;height:30px;border-radius:var(--r-sm);
+  border:none;background:none;color:var(--text-3);
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;transition:background .15s,color .15s;
+}
+.modal-close:hover{background:var(--red-lt);color:var(--red)}
+
+.modal-body{padding:20px 24px}
+.modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.full-width{grid-column:1/-1}
+
+.fg{display:flex;flex-direction:column;gap:4px}
+.fl{font-size:12px;font-weight:500;color:var(--text-2)}
+.fi{
+  padding:8px 12px;border-radius:var(--r-sm);
+  border:1px solid var(--border-med);background:var(--bg);
+  color:var(--text);font-family:inherit;font-size:13px;
+  outline:none;transition:border-color .2s,box-shadow .2s;
+}
+.fi:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(212,175,55,0.16)}
+select.fi{cursor:pointer}
+textarea.fi{resize:vertical}
+
+.modal-footer{
+  display:flex;align-items:center;justify-content:flex-end;gap:10px;
+  padding:16px 24px;border-top:1px solid var(--border);
+}
+.btn-cancel{
+  padding:8px 16px;border-radius:var(--r-md);
+  border:1px solid var(--border-med);background:none;
+  color:var(--text-2);font-size:13px;font-family:inherit;
+  transition:background .15s;
+}
+.btn-cancel:hover{background:var(--surface2)}
+
+@media(max-width:600px){
+  .modal-grid{grid-template-columns:1fr}
+}

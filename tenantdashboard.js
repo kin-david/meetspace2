@@ -13,11 +13,11 @@ var MS = {
 
   /* Rooms */
   rooms: [
-    { id: 'R1', name: 'Boardroom A',   capacity: 10, floor: 2, status: 'occupied'  },
-    { id: 'R2', name: 'Focus Room B',  capacity: 4,  floor: 1, status: 'available' },
-    { id: 'R3', name: 'Workshop C',    capacity: 20, floor: 3, status: 'reserved'  },
-    { id: 'R4', name: 'Pod D',         capacity: 2,  floor: 1, status: 'available' },
-    { id: 'R5', name: 'Suite E',       capacity: 8,  floor: 2, status: 'available' }
+    { id: 'R1', name: 'Boardroom A',   capacity: 10, floor: 2, pricePerHour: 150, status: 'occupied'  },
+    { id: 'R2', name: 'Focus Room B',  capacity: 4,  floor: 1, pricePerHour: 75,  status: 'available' },
+    { id: 'R3', name: 'Workshop C',    capacity: 20, floor: 3, pricePerHour: 200, status: 'reserved'  },
+    { id: 'R4', name: 'Pod D',         capacity: 2,  floor: 1, pricePerHour: 50,  status: 'available' },
+    { id: 'R5', name: 'Suite E',       capacity: 8,  floor: 2, pricePerHour: 120, status: 'available' }
   ],
 
   /* Bookings — persisted in sessionStorage */
@@ -176,6 +176,7 @@ function normalizeRoom(room) {
     name: room.name,
     capacity: room.capacity,
     floor: room.floor,
+    pricePerHour: parseFloat(room.price_per_hour) || 50,
     status: room.status || 'available'
   };
 }
@@ -422,19 +423,6 @@ function openBookingModal(preselectedRoom) {
   var conflictEl = document.getElementById('conflict-alert');
   if (conflictEl) conflictEl.classList.remove('show');
 
-  var agreeEl = document.getElementById('m-agree');
-  if (agreeEl) agreeEl.checked = false;
-  var payEl = document.getElementById('m-payment-method');
-  if (payEl) payEl.value = '';
-  clearVal('m-bank-card-number');
-  clearVal('m-bank-card-name');
-  clearVal('m-bank-expiry');
-  clearVal('m-bank-cvv');
-  clearVal('m-bank-name');
-  clearVal('m-mobile-confirmation');
-  clearVal('m-mobile-phone');
-  togglePaymentFields();
-
   /* Default date to today */
   var dateField = document.getElementById('m-date');
   if (dateField) {
@@ -450,6 +438,14 @@ function openBookingModal(preselectedRoom) {
   /* Set modal title */
   var title = document.getElementById('modal-title');
   if (title) title.textContent = 'New booking';
+
+  /* Reset confirm button text */
+  var confirmBtn = document.getElementById('btn-confirm-booking');
+  if (confirmBtn) {
+    confirmBtn.innerHTML = '<i class="ti ti-check" style="font-size:15px; vertical-align:-2px; margin-right:4px;"></i>Confirm &amp; Pay';
+    confirmBtn.disabled = false;
+  }
+  resetPaySectionUI();
 
   /* Preselect room if passed */
   if (preselectedRoom) {
@@ -467,8 +463,17 @@ function openBookingModal(preselectedRoom) {
   /* Auto-start 5-minute timer */
   timerStart();
 
+  /* Init payment section with preselected room */
+  var roomSel = document.getElementById('m-room');
+  var selectedRoom = preselectedRoom || (roomSel ? roomSel.value : '');
+  if (selectedRoom) {
+    initPaySection(selectedRoom);
+  } else {
+    hidePaySection();
+  }
+
   /* Update price display after modal opens */
-  setTimeout(function() { updatePriceDisplay(); }, 100);
+  setTimeout(function() { updatePriceDisplay(); updatePayTotal(); }, 100);
 }
 
 function openEditModal(bookingId) {
@@ -500,29 +505,6 @@ function openEditModal(bookingId) {
   setVal('m-attendees', b.attendees);
   setVal('m-purpose',   b.purpose);
   setVal('m-notes',     b.notes);
-  var agreeEdit = document.getElementById('m-agree');
-  if (agreeEdit) agreeEdit.checked = true;
-  var paymentMethodEdit = document.getElementById('m-payment-method');
-  if (paymentMethodEdit) {
-    paymentMethodEdit.disabled = false;
-    paymentMethodEdit.value = (b.paymentMethod || '').toLowerCase() === 'card' ? 'bank' : (b.paymentMethod || '');
-  }
-
-  var details = parsePaymentContact(b.paymentContact || '');
-  if (paymentMethodEdit && paymentMethodEdit.value === 'bank' && details) {
-    setVal('m-bank-name', details.bankName || '');
-    setVal('m-bank-card-name', details.cardHolder || '');
-    setVal('m-bank-card-number', details.cardNumber || '');
-    setVal('m-bank-expiry', details.expiry || '');
-    setVal('m-bank-cvv', details.cvv || '');
-  }
-
-  var method = paymentMethodEdit ? paymentMethodEdit.value : '';
-  if ((method === 'mpesa' || method === 'airtel_money' || method === 'tcash') && details) {
-    setVal('m-mobile-confirmation', details.mode || '');
-    setVal('m-mobile-phone', details.phone || '');
-  }
-  togglePaymentFields();
 
   /* Clear field errors */
   document.querySelectorAll('.field-error').forEach(function(el) { el.classList.remove('field-error'); });
@@ -533,6 +515,15 @@ function openEditModal(bookingId) {
 
   var title = document.getElementById('modal-title');
   if (title) title.textContent = 'Edit booking';
+
+  /* Hide pay section for edits */
+  hidePaySection();
+  resetPaySectionUI();
+
+  var confirmBtn = document.getElementById('btn-confirm-booking');
+  if (confirmBtn) {
+    confirmBtn.innerHTML = '<i class="ti ti-check" style="font-size:15px; vertical-align:-2px; margin-right:4px;"></i>Update booking';
+  }
 
   var overlay = document.getElementById('booking-modal');
   if (overlay) overlay.classList.add('open');
@@ -549,6 +540,8 @@ function closeBookingModal() {
   var overlay = document.getElementById('booking-modal');
   if (overlay) overlay.classList.remove('open');
   MS.editingId = null;
+  hidePaySection();
+  resetPaySectionUI();
 }
 
 function setVal(id, val) {
@@ -685,49 +678,6 @@ function validateBookingForm() {
   ok = validateField('m-start',     'err-start',      getVal('m-start') !== '')           && ok;
   ok = validateField('m-end',       'err-end',        getVal('m-end') !== '' && timeToMins(getVal('m-end')) > timeToMins(getVal('m-start'))) && ok;
   ok = validateField('m-attendees', 'err-attendees',  parseInt(getVal('m-attendees')) > 0) && ok;
-  ok = validateField('m-payment-method', 'err-payment-method', document.getElementById('m-agree') && document.getElementById('m-agree').checked && getVal('m-payment-method') !== '') && ok;
-
-  var selectedMethod = getVal('m-payment-method');
-  var isBank = selectedMethod === 'bank';
-  var isMobile = selectedMethod === 'mpesa' || selectedMethod === 'airtel_money' || selectedMethod === 'tcash';
-
-  if (isBank) {
-    ok = validateField('m-bank-card-number', 'err-bank-card-number', /^[0-9\s]{12,23}$/.test(getVal('m-bank-card-number'))) && ok;
-    ok = validateField('m-bank-card-name', 'err-bank-card-name', getVal('m-bank-card-name').length >= 2) && ok;
-    ok = validateField('m-bank-expiry', 'err-bank-expiry', /^(0[1-9]|1[0-2])\/[0-9]{2}$/.test(getVal('m-bank-expiry'))) && ok;
-    ok = validateField('m-bank-cvv', 'err-bank-cvv', /^[0-9]{3,4}$/.test(getVal('m-bank-cvv'))) && ok;
-    ok = validateField('m-bank-name', 'err-bank-name', getVal('m-bank-name').length >= 2) && ok;
-  } else {
-    ['err-bank-card-number', 'err-bank-card-name', 'err-bank-expiry', 'err-bank-cvv', 'err-bank-name'].forEach(function(id) {
-      var err = document.getElementById(id);
-      if (err) err.classList.remove('show');
-    });
-  }
-
-  if (isMobile) {
-    ok = validateField('m-mobile-confirmation', 'err-mobile-confirmation', getVal('m-mobile-confirmation') !== '') && ok;
-    if (getVal('m-mobile-confirmation') === 'manual') {
-      ok = validateField('m-mobile-phone', 'err-mobile-phone', /^\+?[0-9\s-]{9,15}$/.test(getVal('m-mobile-phone'))) && ok;
-    } else {
-      var mobilePhoneErr = document.getElementById('err-mobile-phone');
-      if (mobilePhoneErr) mobilePhoneErr.classList.remove('show');
-    }
-  } else {
-    var mobileModeErr = document.getElementById('err-mobile-confirmation');
-    if (mobileModeErr) mobileModeErr.classList.remove('show');
-    var mobileErr = document.getElementById('err-mobile-phone');
-    if (mobileErr) mobileErr.classList.remove('show');
-  }
-
-  var agree = document.getElementById('m-agree');
-  if (!agree || !agree.checked) {
-    var agreeErr = document.getElementById('err-agree');
-    if (agreeErr) agreeErr.classList.add('show');
-    ok = false;
-  } else {
-    var agreeErrOk = document.getElementById('err-agree');
-    if (agreeErrOk) agreeErrOk.classList.remove('show');
-  }
   return ok;
 }
 
@@ -743,6 +693,16 @@ async function confirmBooking() {
   if (!validateBookingForm()) {
     showToast('Please fill in all required fields.', 'error');
     return;
+  }
+
+  /* Validate payment form too */
+  var paySection = document.getElementById('pay-section');
+  var isPayVisible = paySection && paySection.style.display !== 'none';
+  if (isPayVisible && !PAY.processing) {
+    if (!validatePaymentForm()) {
+      showToast('Please fill in all payment details correctly.', 'error');
+      return;
+    }
   }
 
   var roomId    = getVal('m-room');
@@ -771,8 +731,8 @@ async function confirmBooking() {
     endTime: endTime,
     attendees: parseInt(getVal('m-attendees'), 10),
     purpose: getVal('m-purpose'),
-    paymentMethod: getVal('m-payment-method'),
-    paymentContact: buildPaymentContact(getVal('m-payment-method'))
+    paymentMethod: PAY.method,
+    paymentContact: PAY.method === 'mpesa' ? getVal('pay-phone') : getVal('pay-card-number').replace(/\s/g, '')
   };
 
   try {
@@ -783,19 +743,35 @@ async function confirmBooking() {
       });
       addNotification('Booking updated: ' + getVal('m-title') + ' in ' + (room ? room.name : ''), 'info');
       showToast('Booking updated successfully.', 'success');
+      await loadBookingsFromApi();
+      timerStop();
+      closeBookingModal();
+      renderAll();
     } else {
       await apiRequest('/bookings', {
         method: 'POST',
         body: JSON.stringify(payload)
       });
       addNotification('Booking confirmed: ' + getVal('m-title') + ' in ' + (room ? room.name : ''), 'confirm');
-      showToast('✓ Booking confirmed — ' + (room ? room.name : '') + ' is reserved.', 'success');
-    }
 
-    await loadBookingsFromApi();
-    timerStop();
-    closeBookingModal();
-    renderAll();
+      await loadBookingsFromApi();
+
+      /* Process payment inline */
+      if (isPayVisible) {
+        await processPaymentInline();
+        /* Auto-close after brief delay to show success */
+        setTimeout(function() {
+          timerStop();
+          closeBookingModal();
+          renderAll();
+        }, 2000);
+      } else {
+        showToast('Booking confirmed — ' + (room ? room.name : '') + ' is reserved.', 'success');
+        timerStop();
+        closeBookingModal();
+        renderAll();
+      }
+    }
   } catch (e) {
     showToast(e.message || 'Unable to save booking.', 'error');
   }
@@ -904,16 +880,21 @@ function renderRooms() {
     var badgeCls = status === 'available' ? 'b-av' : status === 'occupied' ? 'b-oc' : 'b-rs';
     var statusLabel = status.charAt(0).toUpperCase() + status.slice(1);
     var canBook = status === 'available';
+    var price = room.pricePerHour || 50;
 
     return '<tr>'
       + '<td><span class="r-dot ' + dotCls + '"></span>' + room.name + '</td>'
       + '<td>' + room.capacity + ' people</td>'
       + '<td>Floor ' + room.floor + '</td>'
+      + '<td class="price-cell">KES ' + price.toFixed(0) + '/hr</td>'
       + '<td><span class="badge ' + badgeCls + '">' + statusLabel + '</span></td>'
       + '<td>' + getNextBooking(room.id) + '</td>'
-      + '<td><button class="book-room-btn"'
-        + (canBook ? ' onclick="openBookingModal(\'' + room.id + '\')"' : ' disabled')
-        + '>' + (canBook ? 'Book' : 'Unavailable') + '</button></td>'
+      + '<td class="action-cell">'
+        + (canBook
+          ? '<button class="book-room-btn" onclick="openBookingModal(\'' + room.id + '\')">Book</button>'
+          + '<button class="pay-btn" onclick="openPaymentModal(\'' + room.id + '\')"><i class="ti ti-credit-card"></i> Pay</button>'
+          : '<button class="book-room-btn" disabled>Unavailable</button>')
+      + '</td>'
       + '</tr>';
   }).join('');
 }
@@ -1222,15 +1203,26 @@ function calToday() {
    TABS — page-level navigation
    ============================================================ */
 function switchTab(tab) {
+  /* Sync tab buttons */
   document.querySelectorAll('.tab-btn').forEach(function(btn) {
     btn.classList.toggle('active', btn.dataset.tab === tab);
   });
+
+  /* Sync sidebar nav items */
+  document.querySelectorAll('.sidebar .nav-item[data-tab]').forEach(function(btn) {
+    btn.classList.toggle('active', btn.dataset.tab === tab);
+  });
+
+  /* Show/hide panels */
   document.querySelectorAll('.tab-panel').forEach(function(panel) {
     panel.style.display = panel.id === 'panel-' + tab ? 'block' : 'none';
   });
 
   /* Trigger calendar render when tab is visible */
   if (tab === 'calendar') renderCalendar();
+
+  /* Close sidebar on mobile after navigation */
+  if (window.innerWidth <= 768) closeSidebar();
 }
 
 /* ============================================================
@@ -1307,6 +1299,213 @@ function checkReminders() {
 }
 
 /* ============================================================
+   PAYMENT (inside booking modal)
+   ============================================================ */
+var PAY = {
+  method: 'mpesa',
+  processing: false
+};
+
+function initPaySection(roomId) {
+  var room = getRoomById(roomId);
+  var paySection = document.getElementById('pay-section');
+  if (!room || !paySection) { if (paySection) paySection.style.display = 'none'; return; }
+
+  paySection.style.display = 'block';
+  PAY.method = 'mpesa';
+  PAY.processing = false;
+
+  var price = room.pricePerHour || 50;
+  setInner('pay-room-name', room.name);
+  setInner('pay-rate', 'KES ' + price.toFixed(0) + '/hr');
+
+  /* Reset state */
+  document.getElementById('pay-success').style.display = 'none';
+  document.getElementById('pay-processing').style.display = 'none';
+  document.getElementById('pay-form-mpesa').style.display = 'block';
+  document.getElementById('pay-form-visa').style.display = 'none';
+
+  /* Reset form fields */
+  ['pay-phone', 'pay-card-number', 'pay-card-expiry', 'pay-card-cvv', 'pay-card-name'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  document.querySelectorAll('#pay-section .field-err-msg').forEach(function(el) { el.classList.remove('show'); });
+
+  /* Reset method tabs */
+  document.querySelectorAll('.pay-method-tab').forEach(function(btn) {
+    btn.classList.toggle('active', btn.dataset.method === 'mpesa');
+  });
+
+  updatePayTotal();
+}
+
+function hidePaySection() {
+  var paySection = document.getElementById('pay-section');
+  if (paySection) paySection.style.display = 'none';
+}
+
+function selectPayMethod(method) {
+  PAY.method = method;
+  document.querySelectorAll('.pay-method-tab').forEach(function(btn) {
+    btn.classList.toggle('active', btn.dataset.method === method);
+  });
+  document.getElementById('pay-form-mpesa').style.display = method === 'mpesa' ? 'block' : 'none';
+  document.getElementById('pay-form-visa').style.display = method === 'visa' ? 'block' : 'none';
+}
+
+function updatePayTotal() {
+  var roomId = getVal('m-room');
+  var room = roomId ? getRoomById(roomId) : null;
+  if (!room) return;
+
+  var price = room.pricePerHour || 50;
+
+  /* Derive duration from start/end times */
+  var startTime = getVal('m-start');
+  var endTime = getVal('m-end');
+  var durationMins = 0;
+
+  if (startTime && endTime) {
+    var startMins = timeToMins(startTime);
+    var endMins = timeToMins(endTime);
+    durationMins = Math.max(0, endMins - startMins);
+  }
+
+  var durationLabel = '—';
+  if (durationMins > 0) {
+    if (durationMins < 60) {
+      durationLabel = durationMins + ' min';
+    } else {
+      var hrs = durationMins / 60;
+      durationLabel = (hrs === Math.floor(hrs)) ? hrs + ' hour' : hrs + ' hours';
+    }
+  }
+
+  var hours = durationMins / 60;
+  var total = price * hours;
+
+  setInner('pay-duration-display', durationLabel);
+  setInner('pay-total', durationMins > 0 ? 'KES ' + total.toFixed(0) : 'KES 0');
+}
+
+function formatCardNumber(input) {
+  var v = input.value.replace(/\D/g, '').substring(0, 16);
+  var parts = [];
+  for (var i = 0; i < v.length; i += 4) {
+    parts.push(v.substring(i, i + 4));
+  }
+  input.value = parts.join(' ');
+}
+
+function formatCardExpiry(input) {
+  var v = input.value.replace(/\D/g, '').substring(0, 4);
+  if (v.length >= 3) {
+    input.value = v.substring(0, 2) + '/' + v.substring(2);
+  } else {
+    input.value = v;
+  }
+}
+
+function validatePaymentForm() {
+  var ok = true;
+
+  if (PAY.method === 'mpesa') {
+    var phone = document.getElementById('pay-phone').value.trim();
+    var phoneOk = /^\+?[0-9\s\-]{9,15}$/.test(phone);
+    ok = validateField('pay-phone', 'err-pay-phone', phoneOk) && ok;
+  } else if (PAY.method === 'visa') {
+    var cardNum = document.getElementById('pay-card-number').value.replace(/\s/g, '');
+    var cardOk = /^[0-9]{13,19}$/.test(cardNum);
+    ok = validateField('pay-card-number', 'err-pay-card', cardOk) && ok;
+
+    var expiry = document.getElementById('pay-card-expiry').value;
+    var expOk = /^(0[1-9]|1[0-2])\/[0-9]{2}$/.test(expiry);
+    ok = validateField('pay-card-expiry', 'err-pay-expiry', expOk) && ok;
+
+    var cvv = document.getElementById('pay-card-cvv').value;
+    var cvvOk = /^[0-9]{3,4}$/.test(cvv);
+    ok = validateField('pay-card-cvv', 'err-pay-cvv', cvvOk) && ok;
+  }
+
+  return ok;
+}
+
+async function processPaymentInline() {
+  if (PAY.processing) return;
+  PAY.processing = true;
+
+  var roomId = getVal('m-room');
+  var room = roomId ? getRoomById(roomId) : null;
+  var price = room ? room.pricePerHour || 50 : 50;
+
+  var startTime = getVal('m-start');
+  var endTime = getVal('m-end');
+  var durationMins = Math.max(0, timeToMins(endTime) - timeToMins(startTime));
+  var total = (price * durationMins / 60).toFixed(0);
+
+  /* Show processing */
+  document.getElementById('pay-form-mpesa').style.display = 'none';
+  document.getElementById('pay-form-visa').style.display = 'none';
+  document.getElementById('pay-processing').style.display = 'flex';
+
+  /* Hide method tabs */
+  var tabs = document.querySelector('.pay-method-tabs');
+  if (tabs) tabs.style.display = 'none';
+
+  /* Simulate API call */
+  await new Promise(function(resolve) { setTimeout(resolve, 2200); });
+
+  /* Show success */
+  document.getElementById('pay-processing').style.display = 'none';
+  document.getElementById('pay-success').style.display = 'block';
+  document.getElementById('pay-success-msg').textContent =
+    'KES ' + total + ' paid for ' + (room ? room.name : 'room') + ' (' + durationMins + ' min) via '
+    + (PAY.method === 'mpesa' ? 'M-Pesa' : 'Visa Card') + '.';
+
+  addNotification('Payment of KES ' + total + ' confirmed for ' + (room ? room.name : 'room') + '.', 'confirm');
+  showToast('Payment of KES ' + total + ' successful!', 'success');
+
+  /* Disable confirm button */
+  var confirmBtn = document.getElementById('btn-confirm-booking');
+  if (confirmBtn) confirmBtn.disabled = true;
+}
+
+function resetPaySectionUI() {
+  var tabs = document.querySelector('.pay-method-tabs');
+  if (tabs) tabs.style.display = 'flex';
+  var confirmBtn = document.getElementById('btn-confirm-booking');
+  if (confirmBtn) confirmBtn.disabled = false;
+  PAY.processing = false;
+}
+
+/* ============================================================
+   SIDEBAR — MOBILE TOGGLE
+   ============================================================ */
+function toggleSidebar() {
+  var sidebar = document.getElementById('sidebar');
+  var backdrop = document.getElementById('sidebar-backdrop');
+  if (!sidebar) return;
+
+  var isOpen = sidebar.classList.contains('mobile-open');
+  if (isOpen) {
+    closeSidebar();
+  } else {
+    sidebar.classList.add('mobile-open');
+    if (backdrop) backdrop.classList.add('show');
+    document.body.style.overflow = 'hidden';
+  }
+}
+
+function closeSidebar() {
+  var sidebar = document.getElementById('sidebar');
+  var backdrop = document.getElementById('sidebar-backdrop');
+  if (sidebar) sidebar.classList.remove('mobile-open');
+  if (backdrop) backdrop.classList.remove('show');
+  document.body.style.overflow = '';
+}
+
+/* ============================================================
    LOGOUT
    ============================================================ */
 function logout() {
@@ -1362,6 +1561,29 @@ document.addEventListener('DOMContentLoaded', async function() {
     });
   });
 
+  /* Sidebar nav items */
+  document.querySelectorAll('.sidebar .nav-item[data-tab]').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      switchTab(btn.dataset.tab);
+    });
+  });
+
+  /* Close sidebar on Escape key */
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      closeSidebar();
+      closeNotifPanel();
+      closeBookingModal();
+    }
+  });
+
+  /* Close sidebar when resizing to desktop */
+  window.addEventListener('resize', function() {
+    if (window.innerWidth > 768) {
+      closeSidebar();
+    }
+  });
+
   /* Close modal on overlay click */
   var overlay = document.getElementById('booking-modal');
   if (overlay) {
@@ -1369,6 +1591,13 @@ document.addEventListener('DOMContentLoaded', async function() {
       if (e.target === overlay) closeBookingModal();
     });
   }
+
+  /* Card number formatting */
+  var cardNumField = document.getElementById('pay-card-number');
+  if (cardNumField) cardNumField.addEventListener('input', function() { formatCardNumber(this); });
+
+  var cardExpiryField = document.getElementById('pay-card-expiry');
+  if (cardExpiryField) cardExpiryField.addEventListener('input', function() { formatCardExpiry(this); });
 
   /* Close notif panel on outside click */
   document.addEventListener('click', function(e) {
@@ -1393,16 +1622,44 @@ document.addEventListener('DOMContentLoaded', async function() {
     if (start && dur) {
       endFld.value = minsToTime(timeToMins(start) + dur);
     }
+    updatePayTotal();
   }
 
-  if (startFld) startFld.addEventListener('change', autoEnd);
+  /* Reverse auto-calc: start/end changes → update duration dropdown */
+  function autoDuration() {
+    if (!startFld || !durFld || !endFld) return;
+    var start = startFld.value;
+    var end   = endFld.value;
+    if (!start || !end) return;
+
+    var diff = timeToMins(end) - timeToMins(start);
+    if (diff <= 0) return;
+
+    /* Snap to closest duration option */
+    var options = [30, 60, 90, 120, 180, 240, 300, 360, 420, 480];
+    var closest = options[0];
+    var minDist = Math.abs(diff - closest);
+    for (var i = 1; i < options.length; i++) {
+      var dist = Math.abs(diff - options[i]);
+      if (dist < minDist) { minDist = dist; closest = options[i]; }
+    }
+    durFld.value = String(closest);
+
+    /* Recalc end time from snapped duration to keep it aligned */
+    endFld.value = minsToTime(timeToMins(start) + closest);
+
+    updatePayTotal();
+  }
+
+  if (startFld) startFld.addEventListener('change', function() { autoEnd(); autoDuration(); });
   if (durFld)   durFld.addEventListener('change', autoEnd);
+  if (endFld)   endFld.addEventListener('change', function() { autoDuration(); updatePayTotal(); });
 
   /* Price calculation on room/duration/time changes */
   function updatePriceDisplay() {
     var roomId = getVal('m-room');
     var room = roomId ? getRoomById(roomId) : null;
-    var pricePerHour = room && room.price_per_hour ? parseFloat(room.price_per_hour) : 0;
+    var pricePerHour = room && room.pricePerHour ? room.pricePerHour : 0;
     
     var startTime = getVal('m-start');
     var endTime = getVal('m-end');
@@ -1442,10 +1699,18 @@ document.addEventListener('DOMContentLoaded', async function() {
   }
 
   var roomSel = document.getElementById('m-room');
-  if (roomSel) roomSel.addEventListener('change', updatePriceDisplay);
+  if (roomSel) roomSel.addEventListener('change', function() {
+    updatePriceDisplay();
+    /* Show/hide pay section when room changes */
+    if (roomSel.value) {
+      initPaySection(roomSel.value);
+    } else {
+      hidePaySection();
+    }
+  });
   if (startFld) startFld.addEventListener('change', updatePriceDisplay);
-  if (endFld) endFld.addEventListener('change', updatePriceDisplay);
-  if (durFld) durFld.addEventListener('change', updatePriceDisplay);
+  if (endFld)   endFld.addEventListener('change', updatePriceDisplay);
+  if (durFld)   durFld.addEventListener('change', updatePriceDisplay);
 
   /* Reminder check */
   setInterval(checkReminders, 60000);

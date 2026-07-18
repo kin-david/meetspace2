@@ -1,17 +1,31 @@
 const path = require('path');
 const express = require('express');
 const helmet = require('helmet');
-const cors = require('cors');
 const rateLimit = require('express-rate-limit');
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
 
+const cors = require('cors');
 const authRoutes = require('./routes/authRoutes');
 const bookingsRoutes = require('./routes/bookings');
 const roomsRoutes = require('./routes/rooms');
 const tenantsRoutes = require('./routes/tenants');
 
 const app = express();
+
+// CORS configuration
+app.use(cors({
+    origin: [
+        'http://127.0.0.1:5500',
+        'http://localhost:5500',
+        'http://localhost:3000',
+        'http://127.0.0.1:3000',
+        'null'
+    ],
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
 // Security: General rate limiter (15 requests per 15 minutes)
 const limiter = rateLimit({
@@ -21,16 +35,6 @@ const limiter = rateLimit({
   legacyHeaders: false,
   skip: (req) => req.method === 'OPTIONS', // Skip preflight requests
   message: { success: false, message: 'Too many requests, please try again later.' }
-});
-
-// Security: Stricter rate limiter for login/register (5 attempts per 15 minutes)
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  limit: 5,
-  standardHeaders: true,
-  legacyHeaders: false,
-  skipSuccessfulRequests: true,
-  message: { success: false, message: 'Too many login attempts. Please try again later.' }
 });
 
 // Security: Helmet - sets various HTTP headers to protect against common vulnerabilities
@@ -52,26 +56,6 @@ app.use(helmet({
   frameguard: { action: 'deny' },
   noSniff: true,
   xssFilter: true
-}));
-
-// Security: CORS - restrict origins and allow credentials
-app.use(cors({
-  origin: function(origin, callback) {
-    const allowedOrigins = [
-      'http://localhost:5500',
-      'http://127.0.0.1:5500',
-      'http://localhost:3000',
-      'http://127.0.0.1:3000'
-    ];
-    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 // Security: Rate limiting
@@ -119,8 +103,8 @@ app.get('/health', (req, res) => {
   res.status(200).json({ success: true, message: 'Server healthy' });
 });
 
-// Authentication routes (apply stricter rate limiting)
-app.use('/api/auth', authLimiter, authRoutes);
+// Auth routes
+app.use('/api/auth', authRoutes);
 
 // Protected routes
 app.use('/api/bookings', bookingsRoutes);

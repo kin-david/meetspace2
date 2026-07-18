@@ -12,8 +12,7 @@ const Booking = {
         b.end_time   AS end_time,
         b.attendees, b.purpose, b.status, b.created_at,
         b.payment_method, b.payment_contact, b.payment_status,
-        t.id   AS tenant_id,   t.name AS tenant_name,
-        t.initials AS tenant_initials, t.color AS tenant_color,
+        t.id   AS tenant_id,   t.full_name AS tenant_name,
         r.id   AS room_id,     r.name AS room_name,
         r.room_code,           r.capacity
       FROM bookings b
@@ -70,7 +69,7 @@ const Booking = {
         b.*,
         b.start_time AS start_time,
         b.end_time   AS end_time,
-        t.name AS tenant_name,
+        t.full_name AS tenant_name,
         r.name AS room_name, r.room_code
       FROM bookings b
       JOIN tenants t ON t.id = b.tenant_id

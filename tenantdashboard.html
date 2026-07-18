@@ -40,11 +40,6 @@
     </button>
     <button class="nav-item"><i class="ti ti-settings"></i> Settings</button>
 
-    <div class="nav-sec" style="margin-top:2rem;margin-bottom:0.5rem;border-top:1px solid var(--border);padding-top:1rem">Admin</div>
-    <button class="nav-item" onclick="window.location.href='./adminlogin.html'" style="color:var(--amber);font-weight:600">
-      <i class="ti ti-shield-lock"></i> Admin Portal
-    </button>
-
     <div class="sb-bottom">
       <div class="user-chip">
         <div class="u-av" id="sb-av">TU</div>
@@ -59,6 +54,9 @@
     </div>
   </aside>
 
+  <!-- Sidebar backdrop for mobile -->
+  <div class="sidebar-backdrop" id="sidebar-backdrop" onclick="closeSidebar()"></div>
+
   <!-- ════════════════════════════════
        MAIN CONTENT
   ════════════════════════════════ -->
@@ -66,20 +64,25 @@
 
     <!-- Top bar -->
     <div class="topbar">
-      <div>
-        <div class="topbar-title" id="greeting">Welcome back!</div>
-        <div class="topbar-sub"  id="today-date"></div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <button class="hamburger" id="hamburger-btn" onclick="toggleSidebar()" aria-label="Toggle menu">
+          <i class="ti ti-menu-2"></i>
+        </button>
+        <div>
+          <div class="topbar-title" id="greeting">Welcome back!</div>
+          <div class="topbar-sub"  id="today-date"></div>
+        </div>
       </div>
       <div class="topbar-right">
         <div class="notif-wrap" id="notif-bell-wrap" onclick="openNotifPanel()" aria-label="Notifications">
           <i class="ti ti-bell"></i>
           <div class="notif-dot" id="notif-dot" style="display:none"></div>
         </div>
-        <button class="notif-wrap" onclick="window.location.href='./adminlogin.html'" aria-label="Admin Portal" title="Admin Portal" style="cursor:pointer;color:var(--amber)">
-          <i class="ti ti-shield-lock"></i>
-        </button>
         <button class="btn-primary" onclick="openBookingModal()">
           <i class="ti ti-plus"></i> Book a room
+        </button>
+        <button class="btn-admin" onclick="window.location.href='./adminlogin.html'" aria-label="Admin Portal" title="Admin Portal">
+          <i class="ti ti-shield-lock"></i> Admin
         </button>
       </div>
     </div>
@@ -198,6 +201,7 @@
                 <th>Room</th>
                 <th>Capacity</th>
                 <th>Floor</th>
+                <th>Price/hr</th>
                 <th>Status</th>
                 <th>Next booking</th>
                 <th>Action</th>
@@ -434,6 +438,10 @@
             <option value="120">2 hours</option>
             <option value="180">3 hours</option>
             <option value="240">4 hours</option>
+            <option value="300">5 hours</option>
+            <option value="360">6 hours</option>
+            <option value="420">7 hours</option>
+            <option value="480">8 hours</option>
           </select>
         </div>
         <div class="m-field">
@@ -457,12 +465,103 @@
 
     </form>
 
-    <div class="modal-footer">
+    <!-- ═══ PAYMENT SECTION (inside booking modal) ═══ -->
+    <div id="pay-section" style="display:none">
+
+      <div class="m-section" style="margin-top:1.5rem">
+        <i class="ti ti-credit-card" style="margin-right:4px"></i> Payment
+      </div>
+
+      <!-- Price summary -->
+      <div class="pay-summary">
+        <div class="pay-summary-row">
+          <span class="pay-summary-label">Room</span>
+          <span class="pay-summary-val" id="pay-room-name">—</span>
+        </div>
+        <div class="pay-summary-row">
+          <span class="pay-summary-label">Rate</span>
+          <span class="pay-summary-val" id="pay-rate">KES 0/hr</span>
+        </div>
+        <div class="pay-summary-row">
+          <span class="pay-summary-label">Duration</span>
+          <span class="pay-summary-val" id="pay-duration-display">1 hour</span>
+        </div>
+        <div class="pay-summary-row pay-total">
+          <span class="pay-summary-label">Total</span>
+          <span class="pay-summary-val" id="pay-total">KES 0</span>
+        </div>
+      </div>
+
+      <!-- Payment method tabs -->
+      <div class="pay-method-tabs">
+        <button class="pay-method-tab active" data-method="mpesa" onclick="selectPayMethod('mpesa')">
+          <i class="ti ti-device-mobile"></i> M-Pesa
+        </button>
+        <button class="pay-method-tab" data-method="visa" onclick="selectPayMethod('visa')">
+          <i class="ti ti-credit-card"></i> Visa Card
+        </button>
+      </div>
+
+      <!-- M-Pesa form -->
+      <div class="pay-form" id="pay-form-mpesa">
+        <div class="m-field">
+          <label for="pay-phone">Phone number</label>
+          <input type="tel" id="pay-phone" placeholder="+254 7XX XXX XXX" autocomplete="tel"/>
+          <div class="field-err-msg" id="err-pay-phone">Please enter a valid phone number.</div>
+        </div>
+        <div class="mpesa-info">
+          <i class="ti ti-info-circle"></i>
+          You will receive an STK push prompt on your phone to complete the payment.
+        </div>
+      </div>
+
+      <!-- Visa form -->
+      <div class="pay-form" id="pay-form-visa" style="display:none">
+        <div class="m-field">
+          <label for="pay-card-number">Card number</label>
+          <input type="text" id="pay-card-number" placeholder="1234 5678 9012 3456" maxlength="19" autocomplete="cc-number"/>
+          <div class="field-err-msg" id="err-pay-card">Please enter a valid card number.</div>
+        </div>
+        <div class="m-row">
+          <div class="m-field">
+            <label for="pay-card-expiry">Expiry</label>
+            <input type="text" id="pay-card-expiry" placeholder="MM/YY" maxlength="5" autocomplete="cc-exp"/>
+            <div class="field-err-msg" id="err-pay-expiry">Invalid expiry.</div>
+          </div>
+          <div class="m-field">
+            <label for="pay-card-cvv">CVV</label>
+            <input type="text" id="pay-card-cvv" placeholder="123" maxlength="4" autocomplete="cc-csc"/>
+            <div class="field-err-msg" id="err-pay-cvv">Invalid CVV.</div>
+          </div>
+        </div>
+        <div class="m-field">
+          <label for="pay-card-name">Cardholder name</label>
+          <input type="text" id="pay-card-name" placeholder="Full name on card" autocomplete="cc-name"/>
+        </div>
+      </div>
+
+      <!-- Success state (hidden initially) -->
+      <div class="pay-success" id="pay-success" style="display:none">
+        <div class="pay-success-icon"><i class="ti ti-circle-check"></i></div>
+        <div class="pay-success-title">Payment Successful!</div>
+        <div class="pay-success-msg" id="pay-success-msg">Your payment has been processed.</div>
+      </div>
+
+      <!-- Processing state (hidden initially) -->
+      <div class="pay-processing" id="pay-processing" style="display:none">
+        <div class="pay-spinner"></div>
+        <div class="pay-processing-text">Processing payment...</div>
+      </div>
+
+    </div>
+    <!-- ═══ END PAYMENT SECTION ═══ -->
+
+    <div class="modal-footer" id="booking-footer">
       <button class="btn-modal-cancel" onclick="closeBookingModal()">
         <i class="ti ti-x" style="font-size:15px; vertical-align:-2px; margin-right:4px;"></i>Cancel
       </button>
       <button class="btn-confirm" id="btn-confirm-booking" onclick="confirmBooking()">
-        <i class="ti ti-check" style="font-size:15px; vertical-align:-2px; margin-right:4px;"></i>Confirm booking
+        <i class="ti ti-check" style="font-size:15px; vertical-align:-2px; margin-right:4px;"></i>Confirm &amp; Pay
       </button>
     </div>
 

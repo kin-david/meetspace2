@@ -15,7 +15,7 @@ router.post('/admin/login', authController.adminLogin);
 
 // Tenant authentication
 router.post('/register', registerValidation, authController.register);
-router.post('/login', loginValidation, authController.login);
+router.post('/login', authController.login);
 router.post('/logout', authController.logout);
 router.get('/restore-session', authController.restoreSession);
 
