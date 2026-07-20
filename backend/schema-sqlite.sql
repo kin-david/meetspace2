@@ -9,11 +9,11 @@ CREATE TABLE IF NOT EXISTS admins (
 
 CREATE TABLE IF NOT EXISTS tenants (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
-  name TEXT NOT NULL,
+  name TEXT,
   full_name TEXT NOT NULL,
   email TEXT NOT NULL UNIQUE,
   phone_number TEXT,
-  password TEXT NOT NULL,
+  password TEXT,
   password_hash TEXT NOT NULL,
   initials TEXT,
   color TEXT,
