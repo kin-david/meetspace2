@@ -58,7 +58,7 @@ app.use(helmet({
       scriptSrc: ["'self'", "'unsafe-inline'"],
       styleSrc: ["'self'", "'unsafe-inline'"],
       imgSrc: ["'self'", 'data:', 'https:'],
-      connectSrc: ["'self'", 'http://localhost:*', 'http://127.0.0.1:*', process.env.CLIENT_URL || ''].filter(Boolean)]
+      connectSrc: ["'self'", 'http://localhost:*', 'http://127.0.0.1:*', process.env.CLIENT_URL || ''].filter(Boolean)
     }
   },
   hsts: {
