@@ -354,7 +354,8 @@ document.addEventListener('DOMContentLoaded', () => {
       setLoading(true);
 
       try {
-        const response = await fetch('http://localhost:5000/api/auth/admin/login', {
+        var adminApiBase = window.API_CONFIG ? window.API_CONFIG.AUTH_BASE : 'http://localhost:5000/api/auth';
+        const response = await fetch(adminApiBase + '/admin/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ email, password })

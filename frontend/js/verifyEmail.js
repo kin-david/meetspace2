@@ -1,4 +1,4 @@
-const API_BASE = 'http://localhost:5000/api/auth';
+const API_BASE = window.API_CONFIG ? window.API_CONFIG.AUTH_BASE : 'http://localhost:5000/api/auth';
 
 const form = document.getElementById('verifyForm');
 const message = document.getElementById('message');

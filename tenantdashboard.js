@@ -4,7 +4,7 @@
 
 'use strict';
 
-var API_BASE = 'http://localhost:5000/api';
+var API_BASE = window.API_CONFIG ? window.API_CONFIG.API_BASE : 'http://localhost:5000/api';
 
 /* ============================================================
    DATA STORE

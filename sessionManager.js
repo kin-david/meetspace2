@@ -20,6 +20,8 @@ class SessionManager {
    * Get API base URL
    */
   getApiBase() {
+    if (window.API_CONFIG) return window.API_CONFIG.AUTH_BASE;
+    // Fallback for local dev
     const defaultPort = '5000';
     const port = localStorage.getItem(this.API_PORT_KEY) || defaultPort;
     const protocol = window.location.protocol;
