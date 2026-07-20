@@ -13,15 +13,28 @@ const tenantsRoutes = require('./routes/tenants');
 
 const app = express();
 
+// Allowed origins: local dev + production frontend from env
+const allowedOrigins = [
+    'http://127.0.0.1:5500',
+    'http://localhost:5500',
+    'http://localhost:3000',
+    'http://127.0.0.1:3000',
+    'null'
+];
+if (process.env.CLIENT_URL) {
+    allowedOrigins.push(process.env.CLIENT_URL);
+}
+
 // CORS configuration
 app.use(cors({
-    origin: [
-        'http://127.0.0.1:5500',
-        'http://localhost:5500',
-        'http://localhost:3000',
-        'http://127.0.0.1:3000',
-        'null'
-    ],
+    origin: (origin, callback) => {
+        // Allow requests with no origin (curl, server-to-server)
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
@@ -45,7 +58,7 @@ app.use(helmet({
       scriptSrc: ["'self'", "'unsafe-inline'"],
       styleSrc: ["'self'", "'unsafe-inline'"],
       imgSrc: ["'self'", 'data:', 'https:'],
-      connectSrc: ["'self'", 'http://localhost:*', 'http://127.0.0.1:*']
+      connectSrc: ["'self'", 'http://localhost:*', 'http://127.0.0.1:*', process.env.CLIENT_URL || ''].filter(Boolean)]
     }
   },
   hsts: {

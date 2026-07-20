@@ -4,6 +4,9 @@ node_modules/
 # Environment variables - NEVER commit this to GitHub
 .env
 
+# SQLite database files (stored on Render persistent disk)
+data/
+
 # Logs
 logs/
 *.log
