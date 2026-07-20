@@ -21,8 +21,15 @@ if (DB_DRIVER === 'sqlite') {
 
     // Ensure the persistent-disk directory exists
     if (!fs.existsSync(dbDir)) {
-        fs.mkdirSync(dbDir, { recursive: true });
-        console.log(`📁 Created data directory: ${dbDir}`);
+        try {
+            fs.mkdirSync(dbDir, { recursive: true });
+            console.log(`📁 Created data directory: ${dbDir}`);
+        } catch (err) {
+            console.error(`❌ Cannot create data directory: ${dbDir}`);
+            console.error('   Attach a Persistent Disk in Render Dashboard → Settings → Disks');
+            console.error('   Error:', err.message);
+            process.exit(1);
+        }
     }
 
     const sqliteDb = open({
