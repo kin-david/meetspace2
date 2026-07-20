@@ -17,20 +17,25 @@ if (DB_DRIVER === 'sqlite') {
     const { open } = require('sqlite');
 
     const dbDir = DB_DISK_PATH;
-    const dbFile = path.join(dbDir, `${DB_NAME}.sqlite`);
 
     // Ensure the persistent-disk directory exists
+    // On Render: /var/data only exists if a disk is mounted
+    // Fallback: store DB inside the project (ephemeral on free tier)
+    let useDir = dbDir;
     if (!fs.existsSync(dbDir)) {
         try {
             fs.mkdirSync(dbDir, { recursive: true });
             console.log(`📁 Created data directory: ${dbDir}`);
-        } catch (err) {
-            console.error(`❌ Cannot create data directory: ${dbDir}`);
-            console.error('   Attach a Persistent Disk in Render Dashboard → Settings → Disks');
-            console.error('   Error:', err.message);
-            process.exit(1);
+        } catch {
+            useDir = path.join(__dirname, '..', 'data');
+            console.log(`⚠️  Disk not mounted at ${dbDir} – falling back to ${useDir}`);
+            console.log('   (Data is ephemeral without a Render Persistent Disk)');
         }
     }
+    if (!fs.existsSync(useDir)) {
+        fs.mkdirSync(useDir, { recursive: true });
+    }
+    const dbFile = path.join(useDir, `${DB_NAME}.sqlite`);
 
     const sqliteDb = open({
         filename: dbFile,
